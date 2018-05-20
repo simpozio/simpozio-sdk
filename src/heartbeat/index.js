@@ -2,28 +2,32 @@ import _ from 'lodash';
 import rnSimpozioService from 'rn-simpozio-background-service';
 import {heartbeatUpdate} from './actions';
 import {HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
+import ObjectID from 'bson-objectid/objectid';
 
 const META = '_simpozioListenerId';
+const listeners = {};
 
 export default class Heartbeat {
-    static listeners = {};
-
     constructor({initialData, isNative = false, store}) {
         this.isNative = isNative;
         this.store = store;
-
+        this.currentData = {};
         this._isStarted = false;
-        this.currentData = _.get(this.store.getState(), 'heartbeat');
-
-        this.store.subscribe(this.handleStoreChange);
-        this.store.dispatch(heartbeatUpdate(this.currentData));
 
         if (!this.isNative) {
             throw 'Not implemented';
         }
+
+        this.store.subscribe(this.handleStoreChange);
+        this.store.dispatch(heartbeatUpdate(initialData));
     }
 
-    static getKey = listener => {
+    getKey = listener => {
+
+        if (!listener) {
+            return;
+        }
+
         if (!listener.hasOwnProperty(META)) {
             if (!Object.isExtensible(listener)) {
                 return 'F';
@@ -37,17 +41,46 @@ export default class Heartbeat {
         return listener[META];
     };
 
-    static addListener = (event, cb) => {
+    addListener = (event, cb) => {
         let key = this.getKey(cb);
 
         if (this.isNative) {
-            this.listeners[key] = rnSimpozioService.addListener(event, cb);
+            listeners[key] = rnSimpozioService.addListener(event, cb);
         }
         return key;
     };
 
-    static handleStoreChange = () => {
-        const newData = _.get(this.store.getState(), 'heartbeat');
+    getMetadata = () => {
+        const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
+            this.store.getState(),
+            'terminal',
+            {}
+        );
+
+        const {state, screen, connection, bandwidth, payload, next} = _.get(this.store.getState(), 'heartbeat', {});
+
+        return {
+            baseUrl,
+            headers: {
+                'Authorization': authorization,
+                'User-Agent': userAgent,
+                'Accept-Language': acceptLanguage,
+                'X-HTTP-Method-Override': xHttpMethodOverride
+            },
+            body: {
+                touchpoint,
+                state,
+                screen,
+                connection,
+                bandwidth,
+                payload,
+                next
+            }
+        };
+    };
+
+    handleStoreChange = () => {
+        const newData = _.get(this.store.getState(), 'heartbeat', {});
 
         if (_.isEqual(this.currentData, newData)) {
             return;
@@ -66,7 +99,7 @@ export default class Heartbeat {
                     });
             } else if (this._isStarted === false) {
                 rnSimpozioService
-                    .startHeartbeat(newData)
+                    .startHeartbeat(this.getMetadata())
                     .then(() => {
                         this._isStarted = true;
                         console.log('SDK HEARTBEAT STARTED');
@@ -75,7 +108,7 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else {
-                rnSimpozioService.updateHeartbeat(newData);
+                rnSimpozioService.updateHeartbeat(this.getMetadata());
             }
         }
 
@@ -95,7 +128,7 @@ export default class Heartbeat {
     };
 
     removeSubscription = key => {
-        if (!this.listeners[key]) {
+        if (!listeners[key]) {
             return;
         }
 
@@ -103,7 +136,7 @@ export default class Heartbeat {
             rnSimpozioService.removeListener(key);
         }
 
-        this.listeners[key] = null;
+        listeners[key] = null;
     };
 
     isStarted = () => {

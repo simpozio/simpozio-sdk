@@ -2,6 +2,7 @@ import _ from 'lodash';
 import {createStore} from 'redux';
 import reducers from './src/reducers';
 import HeartbeatConstructor from './src/heartbeat';
+import {devToolsEnhancer} from 'redux-devtools-extension';
 import {terminalUpdate} from './src/terminal/actions';
 
 /**
@@ -14,27 +15,33 @@ import {terminalUpdate} from './src/terminal/actions';
  * @param configObj.trace {object|boolean} — config for trace or 'false' to avoid trace
  * @returns {{Heartbeat, config}}
  */
-export default class Simpozio {
+export default class SimpozioClass {
     constructor(configObj, isNative = false) {
         const {heartbeat} = _.get(configObj, 'data', {});
 
-        if (!Simpozio.instance) {
-            const store = createStore(reducers);
+        if (!SimpozioClass.instance) {
+            const store = createStore(reducers, {}, devToolsEnhancer());
             // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
             // const Itinerary = new ItineraryConstructor({store, initialData: itinerary, isNative});
 
             // this.Journey = Journey;
             // this.Itinerary = Itinerary;
 
-            this.Heartbeat = new HeartbeatConstructor({store, initialData: heartbeat, isNative});
             this.store = store;
+            this.store.dispatch(terminalUpdate(configObj));
 
-            Simpozio.instance = this;
+            this.Heartbeat = new HeartbeatConstructor({
+                store,
+                initialData: _.get(configObj, 'heartbeat', {}),
+                isNative
+            });
+
+            SimpozioClass.instance = this;
         } else {
             if (heartbeat === false) {
-                Simpozio.instance.Heartbeat.stop();
+                SimpozioClass.instance.Heartbeat.stop();
             }
-            return Simpozio.instance;
+            return SimpozioClass.instance;
         }
     }
 
@@ -43,8 +50,8 @@ export default class Simpozio {
 
         this.store.dispatch(terminalUpdate(configObj));
 
-        if (Simpozio.instance && heartbeat === false) {
-            Simpozio.instance.Heartbeat.stop();
+        if (SimpozioClass.instance && heartbeat === false) {
+            SimpozioClass.instance.Heartbeat.stop();
         }
     };
 }

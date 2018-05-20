@@ -29,9 +29,8 @@ export default (terminal = initialState, action) => {
             });
         }
         case TERMINAL_UPDATE: {
-            return _.assign({}, terminal, {
-                ..._.omit(action, 'payload.data.heartbeat')
-            });
+            const newData = _.get(action, 'payload.data');
+            return _.assign({}, terminal, _.omit(newData, 'heartbeat'));
         }
         default: {
             return terminal;

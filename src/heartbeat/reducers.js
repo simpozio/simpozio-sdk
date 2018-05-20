@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {HEARTBEAT_UPDATE} from './const';
 
 const initialState = {
-    next: 0,
+    next: 5000,
     screen: '',
     state: 'active',
     connection: '',
