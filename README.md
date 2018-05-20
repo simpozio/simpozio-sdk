@@ -1,4 +1,4 @@
-# simpozio-sdk-js
+# simpozio-sdk
 Simpozio Javascript SDK
 
 
