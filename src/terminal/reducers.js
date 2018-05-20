@@ -1,11 +1,7 @@
 import _ from 'lodash';
 import ObjectID from 'bson-objectid';
 
-import {
-    TERMINAL_UPDATE,
-    TERMINAL_ACCESS_TOKEN_UPDATE,
-    TERMINAL_ID_UPDATE,
-} from './const';
+import {TERMINAL_UPDATE, TERMINAL_ACCESS_TOKEN_UPDATE, TERMINAL_ID_UPDATE, API_DEFAULT_URL} from './const';
 
 const initialState = {
     accessToken: '',
@@ -15,8 +11,8 @@ const initialState = {
     locale: 'en_US',
     host: '',
     xHttpMethodOverride: '',
-    baseUrl: '',
-    terminalId: ObjectID.generate(),
+    baseUrl: API_DEFAULT_URL,
+    terminalId: ObjectID.generate()
 };
 
 export default (terminal = initialState, action) => {

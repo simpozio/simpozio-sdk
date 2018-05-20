@@ -1,7 +1,8 @@
 import {combineReducers} from 'redux';
 import terminal from 'terminal/reducers';
-import heratbeat from 'terminal/heratbeat';
+import heartbeat from 'heartbeat/reducers';
 
 export default combineReducers({
-    terminal
+    terminal,
+    heartbeat
 });

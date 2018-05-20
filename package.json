@@ -9,6 +9,7 @@
         "redux": "^3.7.2",
         "redux-persist": "^5.9.1",
         "redux-thunk": "^2.2.0",
-        "reselect": "^3.0.1"
+        "reselect": "^3.0.1",
+        "rn-simpozio-background-service": "git@github.com:smekalka/rn-simpozio-background-service.git"
     }
 }
