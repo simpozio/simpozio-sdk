@@ -16,6 +16,7 @@ const initialState = {
 };
 
 export default (terminal = initialState, action) => {
+    console.log('terminal', action);
     switch (action.type) {
         case TERMINAL_ACCESS_TOKEN_UPDATE: {
             return _.assign({}, terminal, {
@@ -29,9 +30,9 @@ export default (terminal = initialState, action) => {
             });
         }
         case TERMINAL_UPDATE: {
-            return _.assign({}, terminal, {
-                ..._.omit(action, 'payload.data.heartbeat')
-            });
+            const newData = _.get(action, 'payload.data');
+            console.log('newData', newData);
+            return _.assign({}, terminal, _.omit(newData, 'heartbeat'));
         }
         default: {
             return terminal;

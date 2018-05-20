@@ -11,16 +11,15 @@ export default class Heartbeat {
     constructor({initialData, isNative = false, store}) {
         this.isNative = isNative;
         this.store = store;
-
+        this.currentData = {};
         this._isStarted = false;
-        this.currentData = _.get(this.store.getState(), 'heartbeat');
-
-        this.store.subscribe(this.handleStoreChange);
-        this.store.dispatch(heartbeatUpdate(this.currentData));
 
         if (!this.isNative) {
             throw 'Not implemented';
         }
+
+        this.store.subscribe(this.handleStoreChange);
+        this.store.dispatch(heartbeatUpdate(initialData));
     }
 
     static getKey = listener => {
@@ -46,8 +45,37 @@ export default class Heartbeat {
         return key;
     };
 
-    static handleStoreChange = () => {
-        const newData = _.get(this.store.getState(), 'heartbeat');
+    getMetadata = () => {
+        const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
+            this.store.getState(),
+            'terminal',
+            {}
+        );
+
+        const {state, screen, connection, bandwidth, payload, next} = _.get(this.store.getState(), 'heartbeat', {});
+
+        return {
+            baseUrl,
+            headers: {
+                Authorization: authorization,
+                'User-Agent': userAgent,
+                'Accept-Language': acceptLanguage,
+                'X-HTTP-Method-Override': xHttpMethodOverride
+            },
+            body: {
+                touchpoint,
+                state,
+                screen,
+                connection,
+                bandwidth,
+                payload,
+                next
+            }
+        };
+    };
+
+    handleStoreChange = () => {
+        const newData = _.get(this.store.getState(), 'heartbeat', {});
 
         if (_.isEqual(this.currentData, newData)) {
             return;
@@ -65,8 +93,9 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else if (this._isStarted === false) {
+                console.log('1', this.getMetadata());
                 rnSimpozioService
-                    .startHeartbeat(newData)
+                    .startHeartbeat(this.getMetadata())
                     .then(() => {
                         this._isStarted = true;
                         console.log('SDK HEARTBEAT STARTED');
@@ -75,7 +104,7 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else {
-                rnSimpozioService.updateHeartbeat(newData);
+                rnSimpozioService.updateHeartbeat(this.getMetadata());
             }
         }
 
