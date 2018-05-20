@@ -1,0 +1,53 @@
+{
+  "parser": "babel-eslint",
+  "extends": ["eslint:recommended"],
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "env": {
+    "browser":true,
+    "es6": true,
+    "commonjs": true,
+    "node": true
+  },
+  "plugins": [
+    "react",
+    "react-native"
+  ],
+  "rules": {
+    "react/prop-types": 2,
+    "react/no-find-dom-node": 0,
+    "react/no-danger": 0,
+    "no-console": 0,
+    "no-undef": 2,
+    "no-unused-vars": "off",
+    "semi": [
+      2,
+      "always",
+      {
+        "omitLastInOneLineBlock": true
+      }
+    ]
+  },
+  "globals": {
+    "React": false,
+    "moment": false,
+    "_": false,
+    "ga": true,
+    "Ya": true,
+    "trackJs": true,
+    "jest": false,
+    "object": false,
+    "array": false,
+    "boolean": false,
+    "number": false,
+    "string": false,
+    "expect": false,
+    "it": false,
+    "describe": false
+  }
+}
