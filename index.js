@@ -46,8 +46,8 @@ export default class SimpozioClass {
 
         this.store.dispatch(terminalUpdate(configObj));
 
-        if (Simpozio.instance && heartbeat === false) {
-            Simpozio.instance.Heartbeat.stop();
+        if (SimpozioClass.instance && heartbeat === false) {
+            SimpozioClass.instance.Heartbeat.stop();
         }
     };
 }

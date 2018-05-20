@@ -2,12 +2,12 @@ import _ from 'lodash';
 import rnSimpozioService from 'rn-simpozio-background-service';
 import {heartbeatUpdate} from './actions';
 import {HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
+import ObjectID from 'bson-objectid/objectid';
 
 const META = '_simpozioListenerId';
+const listeners = {};
 
 export default class Heartbeat {
-    static listeners = {};
-
     constructor({initialData, isNative = false, store}) {
         this.isNative = isNative;
         this.store = store;
@@ -22,7 +22,12 @@ export default class Heartbeat {
         this.store.dispatch(heartbeatUpdate(initialData));
     }
 
-    static getKey = listener => {
+    getKey = listener => {
+
+        if (!listener) {
+            return;
+        }
+
         if (!listener.hasOwnProperty(META)) {
             if (!Object.isExtensible(listener)) {
                 return 'F';
@@ -36,11 +41,11 @@ export default class Heartbeat {
         return listener[META];
     };
 
-    static addListener = (event, cb) => {
+    addListener = (event, cb) => {
         let key = this.getKey(cb);
 
         if (this.isNative) {
-            this.listeners[key] = rnSimpozioService.addListener(event, cb);
+            listeners[key] = rnSimpozioService.addListener(event, cb);
         }
         return key;
     };
@@ -57,7 +62,7 @@ export default class Heartbeat {
         return {
             baseUrl,
             headers: {
-                Authorization: authorization,
+                'Authorization': authorization,
                 'User-Agent': userAgent,
                 'Accept-Language': acceptLanguage,
                 'X-HTTP-Method-Override': xHttpMethodOverride
@@ -93,7 +98,6 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else if (this._isStarted === false) {
-                console.log('1', this.getMetadata());
                 rnSimpozioService
                     .startHeartbeat(this.getMetadata())
                     .then(() => {
@@ -124,7 +128,7 @@ export default class Heartbeat {
     };
 
     removeSubscription = key => {
-        if (!this.listeners[key]) {
+        if (!listeners[key]) {
             return;
         }
 
@@ -132,7 +136,7 @@ export default class Heartbeat {
             rnSimpozioService.removeListener(key);
         }
 
-        this.listeners[key] = null;
+        listeners[key] = null;
     };
 
     isStarted = () => {
