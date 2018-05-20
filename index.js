@@ -30,7 +30,11 @@ export default class SimpozioClass {
             this.store = store;
             this.store.dispatch(terminalUpdate(configObj));
 
-            this.Heartbeat = new HeartbeatConstructor({store, initialData: heartbeat, isNative});
+            this.Heartbeat = new HeartbeatConstructor({
+                store,
+                initialData: _.get(configObj, 'heartbeat', {}),
+                isNative
+            });
 
             SimpozioClass.instance = this;
         } else {
