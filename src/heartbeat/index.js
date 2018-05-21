@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import rnSimpozioService from 'rn-simpozio-background-service';
-import {heartbeatUpdate} from './actions';
-import {HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
-import ObjectID from 'bson-objectid/objectid';
+import {heartbeatUpdateAction} from './actions';
+import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 
 const META = '_simpozioListenerId';
 const listeners = {};
@@ -18,12 +17,11 @@ export default class Heartbeat {
             throw 'Not implemented';
         }
 
-        this.store.subscribe(this.handleStoreChange);
-        this.store.dispatch(heartbeatUpdate(initialData));
+        this.store.subscribe(this._handleStoreChange);
+        this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
-    getKey = listener => {
-
+    _getKey = listener => {
         if (!listener) {
             return;
         }
@@ -42,7 +40,7 @@ export default class Heartbeat {
     };
 
     addListener = (event, cb) => {
-        let key = this.getKey(cb);
+        let key = this._getKey(cb);
 
         if (this.isNative) {
             listeners[key] = rnSimpozioService.addListener(event, cb);
@@ -50,7 +48,7 @@ export default class Heartbeat {
         return key;
     };
 
-    getMetadata = () => {
+    _getMetadata = () => {
         const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
             this.store.getState(),
             'terminal',
@@ -62,7 +60,7 @@ export default class Heartbeat {
         return {
             baseUrl,
             headers: {
-                'Authorization': authorization,
+                Authorization: authorization,
                 'User-Agent': userAgent,
                 'Accept-Language': acceptLanguage,
                 'X-HTTP-Method-Override': xHttpMethodOverride
@@ -79,7 +77,7 @@ export default class Heartbeat {
         };
     };
 
-    handleStoreChange = () => {
+    _handleStoreChange = () => {
         const newData = _.get(this.store.getState(), 'heartbeat', {});
 
         if (_.isEqual(this.currentData, newData)) {
@@ -99,7 +97,7 @@ export default class Heartbeat {
                     });
             } else if (this._isStarted === false) {
                 rnSimpozioService
-                    .startHeartbeat(this.getMetadata())
+                    .startHeartbeat(this._getMetadata())
                     .then(() => {
                         this._isStarted = true;
                         console.log('SDK HEARTBEAT STARTED');
@@ -108,7 +106,7 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else {
-                rnSimpozioService.updateHeartbeat(this.getMetadata());
+                rnSimpozioService.updateHeartbeat(this._getMetadata());
             }
         }
 
@@ -116,7 +114,7 @@ export default class Heartbeat {
     };
 
     update = data => {
-        this.store.dispatch(heartbeatUpdate(data));
+        this.store.dispatch(heartbeatUpdateAction(data));
     };
 
     onFail = cb => {
@@ -125,6 +123,10 @@ export default class Heartbeat {
 
     onResume = cb => {
         return this.addListener(HEARTBEAT_RN_EVENT_RESUME, cb);
+    };
+
+    onError = cb => {
+        return this.addListener(HEARTBEAT_RN_EVENT_EXCEPTION, cb);
     };
 
     removeSubscription = key => {

@@ -3,7 +3,7 @@ import {createStore} from 'redux';
 import reducers from './src/reducers';
 import HeartbeatConstructor from './src/heartbeat';
 import {devToolsEnhancer} from 'redux-devtools-extension';
-import {terminalUpdate} from './src/terminal/actions';
+import {terminalUpdateAction} from './src/terminal/actions';
 
 /**
  * Create new Simpozio SDK instance
@@ -28,7 +28,7 @@ export default class SimpozioClass {
             // this.Itinerary = Itinerary;
 
             this.store = store;
-            this.store.dispatch(terminalUpdate(configObj));
+            this.store.dispatch(terminalUpdateAction(configObj));
 
             this.Heartbeat = new HeartbeatConstructor({
                 store,
@@ -48,7 +48,7 @@ export default class SimpozioClass {
     config = configObj => {
         const {heartbeat} = _.get(configObj, 'data', {});
 
-        this.store.dispatch(terminalUpdate(configObj));
+        this.store.dispatch(terminalUpdateAction(configObj));
 
         if (SimpozioClass.instance && heartbeat === false) {
             SimpozioClass.instance.Heartbeat.stop();
