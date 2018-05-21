@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import rnSimpozioService from 'rn-simpozio-background-service';
 import {heartbeatUpdate} from './actions';
-import {HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
+import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 import ObjectID from 'bson-objectid/objectid';
 
 const META = '_simpozioListenerId';
@@ -23,7 +23,6 @@ export default class Heartbeat {
     }
 
     getKey = listener => {
-
         if (!listener) {
             return;
         }
@@ -62,7 +61,7 @@ export default class Heartbeat {
         return {
             baseUrl,
             headers: {
-                'Authorization': authorization,
+                Authorization: authorization,
                 'User-Agent': userAgent,
                 'Accept-Language': acceptLanguage,
                 'X-HTTP-Method-Override': xHttpMethodOverride
@@ -125,6 +124,10 @@ export default class Heartbeat {
 
     onResume = cb => {
         return this.addListener(HEARTBEAT_RN_EVENT_RESUME, cb);
+    };
+
+    onError = cb => {
+        return this.addListener(HEARTBEAT_RN_EVENT_EXCEPTION, cb);
     };
 
     removeSubscription = key => {
