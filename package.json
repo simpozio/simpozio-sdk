@@ -11,6 +11,6 @@
         "redux-thunk": "^2.2.0",
         "reselect": "^3.0.1",
         "redux-devtools-extension": "^2.13.2",
-        "rn-simpozio-background-service": "git@github.com:smekalka/rn-simpozio-background-service.git"
+        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git"
     }
 }

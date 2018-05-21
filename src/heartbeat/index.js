@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import rnSimpozioService from 'rn-simpozio-background-service';
+import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
 import {heartbeatUpdateAction} from './actions';
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 
@@ -43,7 +43,7 @@ export default class Heartbeat {
         let key = this._getKey(cb);
 
         if (this.isNative) {
-            listeners[key] = rnSimpozioService.addListener(event, cb);
+            listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
         }
         return key;
     };
@@ -86,8 +86,7 @@ export default class Heartbeat {
 
         if (this.isNative) {
             if (newData === false || _.get(newData, 'next') === 0) {
-                rnSimpozioService
-                    .stopHeartbeat()
+                SimpozioBackgroundWorker.stopHeartbeat()
                     .then(() => {
                         this._isStarted = false;
                         console.log('SDK HEARTBEAT STOPPED');
@@ -96,8 +95,7 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else if (this._isStarted === false) {
-                rnSimpozioService
-                    .startHeartbeat(this._getMetadata())
+                SimpozioBackgroundWorker.startHeartbeat(this._getMetadata())
                     .then(() => {
                         this._isStarted = true;
                         console.log('SDK HEARTBEAT STARTED');
@@ -106,7 +104,7 @@ export default class Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     });
             } else {
-                rnSimpozioService.updateHeartbeat(this._getMetadata());
+                SimpozioBackgroundWorker.updateHeartbeat(this._getMetadata());
             }
         }
 
@@ -135,7 +133,7 @@ export default class Heartbeat {
         }
 
         if (this.isNative) {
-            rnSimpozioService.removeListener(key);
+            SimpozioBackgroundWorker.removeListener(key);
         }
 
         listeners[key] = null;
