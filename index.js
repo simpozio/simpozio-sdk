@@ -45,7 +45,7 @@ export default class SimpozioClass {
         }
     }
 
-    config = configObj => {
+    config(configObj) {
         const {heartbeat} = _.get(configObj, 'data', {});
 
         this.store.dispatch(terminalUpdateAction(configObj));
@@ -53,5 +53,5 @@ export default class SimpozioClass {
         if (SimpozioClass.instance && heartbeat === false) {
             SimpozioClass.instance.Heartbeat.stop();
         }
-    };
+    }
 }

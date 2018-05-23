@@ -28,7 +28,7 @@ export default class Heartbeat {
         this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
-    _getKey = listener => {
+    _getKey(listener) {
         if (!listener) {
             return;
         }
@@ -44,9 +44,9 @@ export default class Heartbeat {
         }
 
         return listener[META];
-    };
+    }
 
-    addListener = (event, cb) => {
+    addListener(event, cb) {
         let key = this._getKey(cb);
 
         if (this.isNative) {
@@ -56,9 +56,9 @@ export default class Heartbeat {
             listeners[key] = {event, cb};
         }
         return key;
-    };
+    }
 
-    _getMetadata = () => {
+    _getMetadata() {
         const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
             this.store.getState(),
             'terminal',
@@ -85,9 +85,9 @@ export default class Heartbeat {
                 next
             }
         };
-    };
+    }
 
-    _handleStoreChange = () => {
+    _handleStoreChange() {
         const {debug} = _.get(this.store.getState(), 'terminal', {});
         const newData = _.get(this.store.getState(), 'heartbeat', {});
 
@@ -134,9 +134,9 @@ export default class Heartbeat {
         }
 
         this.currentData = newData;
-    };
+    }
 
-    _startHeartbeat = () => {
+    _startHeartbeat() {
         if (this._isStarted) {
             return;
         }
@@ -207,9 +207,9 @@ export default class Heartbeat {
         };
 
         helper();
-    };
+    }
 
-    _stopHeartbeat = () => {
+    _stopHeartbeat() {
         if (this.checkConnectionTimeout) {
             clearTimeout(this.checkConnectionTimeout);
             this.checkConnectionTimeout = 0;
@@ -220,25 +220,25 @@ export default class Heartbeat {
         }
 
         this._isStarted = false;
-    };
+    }
 
-    update = data => {
+    update(data) {
         this.store.dispatch(heartbeatUpdateAction(data));
-    };
+    }
 
-    onFail = cb => {
+    onFail(cb) {
         return this.addListener(HEARTBEAT_RN_EVENT_FAIL, cb);
-    };
+    }
 
-    onResume = cb => {
+    onResume(cb) {
         return this.addListener(HEARTBEAT_RN_EVENT_RESUME, cb);
-    };
+    }
 
-    onError = cb => {
+    onError(cb) {
         return this.addListener(HEARTBEAT_RN_EVENT_EXCEPTION, cb);
-    };
+    }
 
-    removeSubscription = key => {
+    removeSubscription(key) {
         if (!listeners[key]) {
             return;
         }
@@ -251,9 +251,9 @@ export default class Heartbeat {
         }
 
         listeners[key] = null;
-    };
+    }
 
-    isStarted = () => {
+    isStarted() {
         return this._isStarted;
-    };
+    }
 }
