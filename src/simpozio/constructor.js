@@ -1,9 +1,8 @@
 import _ from 'lodash';
 import {createStore} from 'redux';
-import reducers from './src/reducers';
-import HeartbeatConstructor from './src/heartbeat';
+import reducers from '../reducers';
 import {devToolsEnhancer} from 'redux-devtools-extension';
-import {terminalUpdateAction} from './src/terminal/actions';
+import {terminalUpdateAction} from '../terminal/actions';
 
 /**
  * Create new Simpozio SDK instance
@@ -16,7 +15,7 @@ import {terminalUpdateAction} from './src/terminal/actions';
  * @returns {{Heartbeat, config}}
  */
 export default class SimpozioClass {
-    constructor(configObj, isNative = false) {
+    constructor(configObj, HeartbeatConstructor) {
         const {heartbeat} = _.get(configObj, 'data', {});
 
         if (!SimpozioClass.instance) {
@@ -32,8 +31,7 @@ export default class SimpozioClass {
 
             this.Heartbeat = new HeartbeatConstructor({
                 store,
-                initialData: _.get(configObj, 'heartbeat', {}),
-                isNative
+                initialData: _.get(configObj, 'heartbeat', {})
             });
 
             SimpozioClass.instance = this;
@@ -45,13 +43,13 @@ export default class SimpozioClass {
         }
     }
 
-    config = configObj => {
+    config(configObj) {
         const {heartbeat} = _.get(configObj, 'data', {});
 
         this.store.dispatch(terminalUpdateAction(configObj));
 
-        if (SimpozioClass.instance && heartbeat === false) {
-            SimpozioClass.instance.Heartbeat.stop();
+        if (heartbeat) {
+            SimpozioClass.instance.Heartbeat.update(heartbeat);
         }
-    };
+    }
 }
