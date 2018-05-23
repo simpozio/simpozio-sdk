@@ -2,8 +2,7 @@ import axios from 'axios';
 import _ from 'lodash';
 
 export default class Api {
-    constructor({store, isNative}) {
-        this.isNative = isNative;
+    constructor({store}) {
         this.store = store;
     }
 

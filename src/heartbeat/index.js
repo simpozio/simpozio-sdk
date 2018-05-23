@@ -2,7 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 import EventEmitter from 'events';
 import {heartbeatUpdateAction} from './actions';
-import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
 
 import Api from '../api';
 import {terminalOnlineAction} from '../terminal/actions';
@@ -14,14 +13,13 @@ const META = '_simpozioListenerId';
 const listeners = {};
 
 export default class Heartbeat {
-    constructor({initialData, isNative = false, store}) {
+    constructor({initialData, store}) {
         this._isStarted = false;
 
-        this.isNative = isNative;
         this.store = store;
         this.cancelToken = null;
         this.checkConnectionTimeout = 0;
-        this.api = new Api({store, isNative});
+        this.api = new Api({store});
         this.currentData = {};
 
         this.store.subscribe(this._handleStoreChange);
@@ -49,88 +47,39 @@ export default class Heartbeat {
     addListener(event, cb) {
         let key = this._getKey(cb);
 
-        if (this.isNative) {
-            listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
-        } else {
-            EventEmitter.addListener(event, cb);
-            listeners[key] = {event, cb};
-        }
+        EventEmitter.addListener(event, cb);
+        listeners[key] = {event, cb};
+
         return key;
     }
 
     _getMetadata() {
-        const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
-            this.store.getState(),
-            'terminal',
-            {}
-        );
+        const {touchpoint} = _.get(this.store.getState(), 'terminal', {});
 
         const {state, screen, connection, bandwidth, payload, next} = _.get(this.store.getState(), 'heartbeat', {});
 
         return {
-            baseUrl,
-            headers: {
-                Authorization: authorization,
-                'User-Agent': userAgent,
-                'Accept-Language': acceptLanguage,
-                'X-HTTP-Method-Override': xHttpMethodOverride
-            },
-            body: {
-                touchpoint,
-                state,
-                screen,
-                connection,
-                bandwidth,
-                payload,
-                next
-            }
+            touchpoint,
+            state,
+            screen,
+            connection,
+            bandwidth,
+            payload,
+            next
         };
     }
 
     _handleStoreChange() {
-        const {debug} = _.get(this.store.getState(), 'terminal', {});
         const newData = _.get(this.store.getState(), 'heartbeat', {});
 
         if (_.isEqual(this.currentData, newData)) {
             return;
         }
 
-        if (this.isNative) {
-            if (newData === false || _.get(newData, 'next') === 0) {
-                SimpozioBackgroundWorker.stopHeartbeat()
-                    .then(() => {
-                        this._isStarted = false;
-                        if (debug) {
-                            console.log('SDK HEARTBEAT STOPPED');
-                        }
-                    })
-                    .catch(error => {
-                        if (debug) {
-                            console.log('SDK HEARTBEAT ERROR', error);
-                        }
-                    });
-            } else if (this._isStarted === false) {
-                SimpozioBackgroundWorker.startHeartbeat(this._getMetadata())
-                    .then(() => {
-                        this._isStarted = true;
-                        if (debug) {
-                            console.log('SDK HEARTBEAT STARTED');
-                        }
-                    })
-                    .catch(error => {
-                        if (debug) {
-                            console.log('SDK HEARTBEAT ERROR', error);
-                        }
-                    });
-            } else {
-                SimpozioBackgroundWorker.updateHeartbeat(this._getMetadata());
-            }
-        } else {
-            if (newData === false || _.get(newData, 'next') === 0) {
-                this._stopHeartbeat();
-            } else if (this._isStarted === false) {
-                this._startHeartbeat();
-            }
+        if (newData === false || _.get(newData, 'next') === 0) {
+            this._stopHeartbeat();
+        } else if (this._isStarted === false) {
+            this._startHeartbeat();
         }
 
         this.currentData = newData;
@@ -243,12 +192,8 @@ export default class Heartbeat {
             return;
         }
 
-        if (this.isNative) {
-            SimpozioBackgroundWorker.removeListener(key);
-        } else {
-            const {event, cd} = listeners[key];
-            EventEmitter.removeListener(event, cd);
-        }
+        const {event, cd} = listeners[key];
+        EventEmitter.removeListener(event, cd);
 
         listeners[key] = null;
     }
