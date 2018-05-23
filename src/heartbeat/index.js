@@ -22,7 +22,7 @@ export default class Heartbeat {
         this.api = new Api({store});
         this.currentData = {};
 
-        this.store.subscribe(this._handleStoreChange);
+        this.store.subscribe(this._handleStoreChange.bind(this));
         this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
@@ -70,6 +70,7 @@ export default class Heartbeat {
     }
 
     _handleStoreChange() {
+        const {authorization} = _.get(this.store.getState(), 'terminal', {});
         const newData = _.get(this.store.getState(), 'heartbeat', {});
 
         if (_.isEqual(this.currentData, newData)) {
@@ -78,7 +79,7 @@ export default class Heartbeat {
 
         if (newData === false || _.get(newData, 'next') === 0) {
             this._stopHeartbeat();
-        } else if (this._isStarted === false) {
+        } else if (this._isStarted === false && authorization) {
             this._startHeartbeat();
         }
 
@@ -94,10 +95,11 @@ export default class Heartbeat {
 
         const helper = () => {
             this.checkConnectionTimeout = 0;
-            const {accessToken, online, debug} = _.get(this.store.getState(), 'terminal', {});
+            const {authorization, online, debug} = _.get(this.store.getState(), 'terminal', {});
             const {next, lastOffline} = _.get(this.store.getState(), 'heartbeat', {});
 
-            if (!accessToken) {
+            if (!authorization) {
+                this._isStarted = false;
                 return;
             }
 
@@ -138,7 +140,7 @@ export default class Heartbeat {
                 return Promise.resolve(result);
             };
 
-            const data = _.assign({}, this._getMetadata().body, {
+            const data = _.assign({}, this._getMetadata(), {
                 timestamp: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ')
             });
 

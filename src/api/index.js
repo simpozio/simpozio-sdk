@@ -13,7 +13,7 @@ export default class Api {
             {}
         );
 
-        axios.interceptors.request.use(config => {
+        const interceptorRequest = axios.interceptors.request.use(config => {
             if (debug && !_.get(config, 'skipLogs.request')) {
                 console.log(
                     'SIMPOZIO_SDK API REQUEST: ',
@@ -27,7 +27,7 @@ export default class Api {
         });
 
         // Store response timestamp and/or response time in response/error `config`
-        axios.interceptors.response.use(
+        const interceptorResponse = axios.interceptors.response.use(
             response => {
                 const requestTime = Date.now() - response.config.requestStartTime;
                 const {result, status} = _.get(response, 'data', {});
@@ -103,23 +103,31 @@ export default class Api {
             params: _.assign({}, params, {
                 locale
             })
-        });
+        })
+            .then(() => {
+                axios.interceptors.request.eject(interceptorRequest);
+                axios.interceptors.response.eject(interceptorResponse);
+            })
+            .catch(() => {
+                axios.interceptors.request.eject(interceptorRequest);
+                axios.interceptors.response.eject(interceptorResponse);
+            });
     }
 
     get({url, data, params, headers, timeout, cancelToken}) {
-        this._requestHelper('get', {url, data, params, headers, timeout, cancelToken});
+        return this._requestHelper('get', {url, data, params, headers, timeout, cancelToken});
     }
 
     post({url, data, params, headers, timeout, cancelToken}) {
-        this._requestHelper('post', {url, data, params, headers, timeout, cancelToken});
+        return this._requestHelper('post', {url, data, params, headers, timeout, cancelToken});
     }
 
     delete({url, data, params, headers, timeout, cancelToken}) {
-        this._requestHelper('delete', {url, data, params, headers, timeout, cancelToken});
+        return this._requestHelper('delete', {url, data, params, headers, timeout, cancelToken});
     }
 
     put({url, data, params, headers, timeout, cancelToken}) {
-        this._requestHelper('put', {url, data, params, headers, timeout, cancelToken});
+        return this._requestHelper('put', {url, data, params, headers, timeout, cancelToken});
     }
 
     makeCancelToken() {

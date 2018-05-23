@@ -10,7 +10,7 @@ import {
 } from './const';
 
 const initialState = {
-    accessToken: '',
+    authorization: '',
     touchpoint: '',
     userAgent: '',
     acceptLanguage: 'en_US',
@@ -27,7 +27,7 @@ export default (terminal = initialState, action) => {
     switch (action.type) {
         case TERMINAL_ACCESS_TOKEN_UPDATE: {
             return _.assign({}, terminal, {
-                accessToken: _.get(action, 'payload.accessToken'),
+                accessToken: _.get(action, 'payload.authorization'),
                 terminalId: _.get(action, 'payload.terminalId')
             });
         }
