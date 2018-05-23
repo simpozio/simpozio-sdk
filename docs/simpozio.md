@@ -37,6 +37,9 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
 
 ```false``` to avoid heartbeat
 
+#### config.debug
+**{boolean}** Debug mode
+
 ### Methods
 
 #### simpozio.auth(object: AuthObject): Promise
