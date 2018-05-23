@@ -7,7 +7,7 @@ export default class Api {
         this.store = store;
     }
 
-    _requestHelper = (method, {url, data, params, headers, timeout, cancelToken}) => {
+    _requestHelper(method, {url, data, params, headers, timeout, cancelToken}) {
         const {baseUrl, authorization, userAgent, acceptLanguage, xHttpMethodOverride, locale, debug} = _.get(
             this.store.getState(),
             'terminal',
@@ -105,26 +105,26 @@ export default class Api {
                 locale
             })
         });
-    };
+    }
 
-    get = ({url, data, params, headers, timeout, cancelToken}) => {
+    get({url, data, params, headers, timeout, cancelToken}) {
         this._requestHelper('get', {url, data, params, headers, timeout, cancelToken});
-    };
+    }
 
-    post = ({url, data, params, headers, timeout, cancelToken}) => {
+    post({url, data, params, headers, timeout, cancelToken}) {
         this._requestHelper('post', {url, data, params, headers, timeout, cancelToken});
-    };
+    }
 
-    delete = ({url, data, params, headers, timeout, cancelToken}) => {
+    delete({url, data, params, headers, timeout, cancelToken}) {
         this._requestHelper('delete', {url, data, params, headers, timeout, cancelToken});
-    };
+    }
 
-    put = ({url, data, params, headers, timeout, cancelToken}) => {
+    put({url, data, params, headers, timeout, cancelToken}) {
         this._requestHelper('put', {url, data, params, headers, timeout, cancelToken});
-    };
+    }
 
-    makeCancelToken = () => {
+    makeCancelToken() {
         const CancelToken = axios.CancelToken;
         return CancelToken.source();
-    };
+    }
 }
