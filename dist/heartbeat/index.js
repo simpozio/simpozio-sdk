@@ -18,13 +18,17 @@ var _events = require('events');
 
 var _events2 = _interopRequireDefault(_events);
 
-var _actions = require('./actions');
+var _logger = require('../simpozio/logger');
+
+var _logger2 = _interopRequireDefault(_logger);
 
 var _api = require('../api');
 
 var _api2 = _interopRequireDefault(_api);
 
-var _actions2 = require('../terminal/actions');
+var _actions = require('../terminal/actions');
+
+var _actions2 = require('./actions');
 
 var _const = require('./const');
 
@@ -45,17 +49,19 @@ var Heartbeat = function () {
 
         _classCallCheck(this, Heartbeat);
 
+        this.name = 'Heartbeat';
         this._isStarted = false;
 
         this.store = store;
         this.cancelToken = null;
         this.checkConnectionTimeout = 0;
+        this.logger = new _logger2.default({ store: store, name: this.name });
         this.api = new _api2.default({ store: store });
         this.currentData = {};
         this.requestTime = 0;
 
         this.store.subscribe(this._handleStoreChange.bind(this));
-        this.store.dispatch((0, _actions.heartbeatUpdateAction)(initialData));
+        this.store.dispatch((0, _actions2.heartbeatUpdateAction)(initialData));
     }
 
     _createClass(Heartbeat, [{
@@ -165,12 +171,10 @@ var Heartbeat = function () {
 
                     _this.cancelToken = null;
 
-                    if (debug) {
-                        console.log('SIMPOZIO SDK HEARTBEAT FAILED', error);
-                    }
-
                     if (online) {
-                        _this.store.dispatch((0, _actions2.terminalOnlineAction)(false));
+                        _this.logger.error('fail', error);
+
+                        _this.store.dispatch((0, _actions.terminalOnlineAction)(false));
                         eventEmitter.emit(_const.HEARTBEAT_RN_EVENT_FAIL, error);
                     }
 
@@ -194,7 +198,9 @@ var Heartbeat = function () {
                             duration: (0, _moment2.default)().valueOf() - lastOffline
                         });
 
-                        _this.store.dispatch((0, _actions2.terminalOnlineAction)(true));
+                        _this.logger.log('resume', result);
+
+                        _this.store.dispatch((0, _actions.terminalOnlineAction)(true));
                     }
                     if (!_this.checkConnectionTimeout) {
                         _this.checkConnectionTimeout = setTimeout(function () {
@@ -237,7 +243,7 @@ var Heartbeat = function () {
     }, {
         key: 'update',
         value: function update(data) {
-            this.store.dispatch((0, _actions.heartbeatUpdateAction)(data));
+            this.store.dispatch((0, _actions2.heartbeatUpdateAction)(data));
         }
     }, {
         key: 'onFail',

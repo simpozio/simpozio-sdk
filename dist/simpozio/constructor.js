@@ -42,6 +42,7 @@ var SimpozioClass = function () {
             heartbeat = _$get.heartbeat;
 
         if (!SimpozioClass.instance) {
+            this.name = 'Simpozio';
             var store = (0, _redux.createStore)(_reducers2.default, {}, (0, _reduxDevtoolsExtension.devToolsEnhancer)());
             // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
             // const Itinerary = new ItineraryConstructor({store, initialData: itinerary, isNative});

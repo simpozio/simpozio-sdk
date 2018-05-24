@@ -9,13 +9,13 @@
         "jest": "^22.4.3",
         "lodash": "^4.17.5",
         "moment": "^2.22.1",
-        "react-native-simpozio-background-worker":
-            "git@github.com:smekalka/react-native-simpozio-background-worker.git",
+        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git",
         "redux": "^3.7.2",
         "redux-devtools-extension": "^2.13.2",
         "redux-persist": "^5.9.1",
         "redux-thunk": "^2.2.0",
-        "reselect": "^3.0.1"
+        "reselect": "^3.0.1",
+        "winston": "^2.4.2"
     },
     "devDependencies": {
         "babel-cli": "^6.26.0",
@@ -27,6 +27,8 @@
     },
     "main": "./dist",
     "babel": {
-        "presets": ["env"]
+        "presets": [
+            "env"
+        ]
     }
 }

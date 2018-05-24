@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 import EventEmitter from 'events';
-import {heartbeatUpdateAction} from './actions';
 
+import Logger from '../simpozio/logger';
 import Api from '../api';
 import {terminalOnlineAction} from '../terminal/actions';
+import {heartbeatUpdateAction} from './actions';
 
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
@@ -15,11 +16,13 @@ const eventEmitter = new EventEmitter();
 
 export default class Heartbeat {
     constructor({initialData, store}) {
+        this.name = 'Heartbeat';
         this._isStarted = false;
 
         this.store = store;
         this.cancelToken = null;
         this.checkConnectionTimeout = 0;
+        this.logger = new Logger({store, name: this.name});
         this.api = new Api({store});
         this.currentData = {};
         this.requestTime = 0;
@@ -111,11 +114,9 @@ export default class Heartbeat {
 
                 this.cancelToken = null;
 
-                if (debug) {
-                    console.log('SIMPOZIO SDK HEARTBEAT FAILED', error);
-                }
-
                 if (online) {
+                    this.logger.error('fail', error);
+
                     this.store.dispatch(terminalOnlineAction(false));
                     eventEmitter.emit(HEARTBEAT_RN_EVENT_FAIL, error);
                 }
@@ -135,6 +136,8 @@ export default class Heartbeat {
                     eventEmitter.emit(HEARTBEAT_RN_EVENT_RESUME, {
                         duration: moment().valueOf() - lastOffline
                     });
+
+                    this.logger.log('resume', result);
 
                     this.store.dispatch(terminalOnlineAction(true));
                 }
