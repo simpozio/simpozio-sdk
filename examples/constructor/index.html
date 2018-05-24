@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Constructor</title>
+</head>
+<body>
+<script src="../init.js"></script>
+<script>
+    window.onload = () => {
+        simpozio = new SimpozioClass({
+            debug: true,
+            authorization:
+                'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MjQ1NzEzNzQsImV4cGlyZWQiOjE1NTA0OTEzNzR9.0GwfQZa7URfw9cJLFo9G6KIWFs5aOcTQJznP6NYvQbQ',
+            userAgent:
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.117 Safari/537.36',
+            heartbeat: {
+                screen: 'main'
+            }
+        });
+
+        simpozio.Heartbeat.onFail(error => {
+            console.log('onFail', error);
+        });
+    }
+</script>
+</body>
+</html>

@@ -4,7 +4,7 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _constructor = require('./simpozio/constructor');
+var _constructor = require('./simpozio/constructor.js');
 
 var _constructor2 = _interopRequireDefault(_constructor);
 
