@@ -19,6 +19,7 @@ export default class SimpozioClass {
         const {heartbeat} = _.get(configObj, 'data', {});
 
         if (!SimpozioClass.instance) {
+            this.name = 'Simpozio';
             const store = createStore(reducers, {}, devToolsEnhancer());
             // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
             // const Itinerary = new ItineraryConstructor({store, initialData: itinerary, isNative});

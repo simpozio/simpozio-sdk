@@ -24,6 +24,7 @@ var Api = function () {
 
         _classCallCheck(this, Api);
 
+        this.name = 'Api';
         this.store = store;
     }
 
@@ -42,8 +43,7 @@ var Api = function () {
             var _$get = _lodash2.default.get(this.store.getState(), 'terminal', {}),
                 baseUrl = _$get.baseUrl,
                 authorization = _$get.authorization,
-                xHttpMethodOverride = _$get.xHttpMethodOverride,
-                debug = _$get.debug;
+                xHttpMethodOverride = _$get.xHttpMethodOverride;
 
             var headers = _lodash2.default.assign({}, {
                 Authorization: authorization,
@@ -51,10 +51,6 @@ var Api = function () {
             }, _headers);
 
             axiosInstance.interceptors.request.use(function (config) {
-                if (debug && !_lodash2.default.get(config, 'skipLogs.request')) {
-                    console.log('SIMPOZIO_SDK API REQUEST: ', _lodash2.default.pick(config, ['data', 'url', 'timeout', 'method', 'headers']));
-                }
-
                 return _lodash2.default.assign({}, config, {
                     requestStartTime: Date.now()
                 });
@@ -69,29 +65,14 @@ var Api = function () {
                     status = _$get2.status;
 
                 if (status === 'ok') {
-                    if (debug && !_lodash2.default.get(response, 'config.skipLogs.response')) {
-                        console.log('SIMPOZIO_SDK API RESPONSE: ' + _lodash2.default.get(response, 'config.method') + ' ' + _lodash2.default.get(response, 'config.url'), result);
-                    }
                     return {
                         result: result,
                         requestTime: requestTime
                     };
                 } else {
-                    if (debug && !_lodash2.default.get(response, 'config.skipLogs.error')) {
-                        console.log('SIMPOZIO_SDK API ERROR: ' + _lodash2.default.get(response, 'config.method') + ' ' + _lodash2.default.get(response, 'config.url'), response);
-                    }
                     return Promise.reject({ result: result, status: status });
                 }
             }, function (error) {
-                if (debug && !_lodash2.default.get(error, 'config.skipLogs.error')) {
-                    if (error.response) {
-                        console.log('SIMPOZIO_SDK ERROR API: ' + _lodash2.default.get(error, 'config.method') + ' ' + _lodash2.default.get(error, 'config.url') + ' ' + _lodash2.default.get(error, 'response.status'), _lodash2.default.get(error, 'response.data'));
-                    } else if (error.request) {
-                        console.log('SIMPOZIO_SDK ERROR API TIMEOUT: ' + _lodash2.default.get(error, 'config.method') + ' ' + _lodash2.default.get(error, 'config.url'));
-                    } else {
-                        console.log('SIMPOZIO_SDK ERROR API: ' + _lodash2.default.get(error, 'config.method') + ' ' + _lodash2.default.get(error, 'config.url'), _lodash2.default.get(error, 'message'));
-                    }
-                }
                 return Promise.reject(error);
             });
 
