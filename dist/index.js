@@ -4,11 +4,11 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _constructor = require('./src/simpozio/constructor');
+var _constructor = require('./simpozio/constructor.js');
 
 var _constructor2 = _interopRequireDefault(_constructor);
 
-var _heartbeat = require('./src/heartbeat');
+var _heartbeat = require('./heartbeat');
 
 var _heartbeat2 = _interopRequireDefault(_heartbeat);
 

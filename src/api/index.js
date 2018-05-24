@@ -6,14 +6,20 @@ export default class Api {
         this.store = store;
     }
 
-    _requestHelper(method, {url, data, params, headers, timeout, cancelToken}) {
-        const {baseUrl, authorization, userAgent, acceptLanguage, xHttpMethodOverride, locale, debug} = _.get(
-            this.store.getState(),
-            'terminal',
-            {}
+    _requestHelper(method, {url, data, params, headers: _headers, timeout, cancelToken}) {
+        const axiosInstance = axios.create();
+        const {baseUrl, authorization, xHttpMethodOverride, debug} = _.get(this.store.getState(), 'terminal', {});
+
+        const headers = _.assign(
+            {},
+            {
+                Authorization: authorization,
+                'X-HTTP-Method-Override': xHttpMethodOverride
+            },
+            _headers
         );
 
-        const interceptorRequest = axios.interceptors.request.use(config => {
+        axiosInstance.interceptors.request.use(config => {
             if (debug && !_.get(config, 'skipLogs.request')) {
                 console.log(
                     'SIMPOZIO_SDK API REQUEST: ',
@@ -27,9 +33,9 @@ export default class Api {
         });
 
         // Store response timestamp and/or response time in response/error `config`
-        const interceptorResponse = axios.interceptors.response.use(
+        axiosInstance.interceptors.response.use(
             response => {
-                const requestTime = Date.now() - response.config.requestStartTime;
+                const requestTime = Date.now() - _.get(response, 'config.requestStartTime', 0);
                 const {result, status} = _.get(response, 'data', {});
                 if (status === 'ok') {
                     if (debug && !_.get(response, 'config.skipLogs.response')) {
@@ -41,10 +47,10 @@ export default class Api {
                             result
                         );
                     }
-                    return Promise.resolve({
-                        result: result,
+                    return {
+                        result,
                         requestTime
-                    });
+                    };
                 } else {
                     if (debug && !_.get(response, 'config.skipLogs.error')) {
                         console.log(
@@ -70,48 +76,31 @@ export default class Api {
                         );
                     } else if (error.request) {
                         console.log(
-                            `ERROR API TIMEOUT: ${_.get(error, 'config.method')} ${_.get(error, 'config.url')}`
+                            `SIMPOZIO_SDK ERROR API TIMEOUT: ${_.get(error, 'config.method')} ${_.get(
+                                error,
+                                'config.url'
+                            )}`
                         );
                     } else {
                         console.log(
-                            `ERROR API: ${_.get(error, 'config.method')} ${_.get(error, 'config.url')}`,
+                            `SIMPOZIO_SDK ERROR API: ${_.get(error, 'config.method')} ${_.get(error, 'config.url')}`,
                             _.get(error, 'message')
                         );
                     }
                 }
+                return Promise.reject(error);
             }
         );
 
-        return axios({
+        return axiosInstance({
             url,
             data,
             method,
             timeout,
-            baseUrl,
+            baseURL: baseUrl,
             cancelToken,
-            headers: _.assign(
-                {},
-                {
-                    Date: moment.utc().format(`ddd, D MMM YYYY HH:mm:ss`) + ' GMT',
-                    Authorization: authorization,
-                    'User-Agent': userAgent,
-                    'Accept-Language': acceptLanguage,
-                    'X-HTTP-Method-Override': xHttpMethodOverride
-                },
-                headers
-            ),
-            params: _.assign({}, params, {
-                locale
-            })
-        })
-            .then(() => {
-                axios.interceptors.request.eject(interceptorRequest);
-                axios.interceptors.response.eject(interceptorResponse);
-            })
-            .catch(() => {
-                axios.interceptors.request.eject(interceptorRequest);
-                axios.interceptors.response.eject(interceptorResponse);
-            });
+            headers
+        });
     }
 
     get({url, data, params, headers, timeout, cancelToken}) {
@@ -131,7 +120,7 @@ export default class Api {
     }
 
     makeCancelToken() {
-        const CancelToken = axios.CancelToken;
-        return CancelToken.source();
+        const cancelToken = axios.CancelToken;
+        return cancelToken.source();
     }
 }

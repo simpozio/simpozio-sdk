@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import EventEmitter from 'events';
 import {COMMON_METHOD_ADD, COMMON_METHOD_REMOVE, COMMON_METHOD_RESET, COMMON_METHOD_SET} from './common.consts';
 
 export class Collection {

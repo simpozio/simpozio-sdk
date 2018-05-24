@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import {createStore} from 'redux';
-import reducers from '../reducers';
+import reducers from './reducers';
 import {devToolsEnhancer} from 'redux-devtools-extension';
 import {terminalUpdateAction} from '../terminal/actions';
 
@@ -27,12 +27,13 @@ export default class SimpozioClass {
             // this.Itinerary = Itinerary;
 
             this.store = store;
-            this.store.dispatch(terminalUpdateAction(configObj));
 
             this.Heartbeat = new HeartbeatConstructor({
                 store,
                 initialData: _.get(configObj, 'heartbeat', {})
             });
+
+            this.store.dispatch(terminalUpdateAction(configObj));
 
             SimpozioClass.instance = this;
         } else {

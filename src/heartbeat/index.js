@@ -11,6 +11,7 @@ import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
 
 const META = '_simpozioListenerId';
 const listeners = {};
+const eventEmitter = new EventEmitter();
 
 export default class Heartbeat {
     constructor({initialData, store}) {
@@ -21,6 +22,7 @@ export default class Heartbeat {
         this.checkConnectionTimeout = 0;
         this.api = new Api({store});
         this.currentData = {};
+        this.requestTime = 0;
 
         this.store.subscribe(this._handleStoreChange.bind(this));
         this.store.dispatch(heartbeatUpdateAction(initialData));
@@ -47,7 +49,7 @@ export default class Heartbeat {
     addListener(event, cb) {
         let key = this._getKey(cb);
 
-        EventEmitter.addListener(event, cb);
+        eventEmitter.addListener(event, cb);
         listeners[key] = {event, cb};
 
         return key;
@@ -71,7 +73,8 @@ export default class Heartbeat {
 
     _handleStoreChange() {
         const {authorization} = _.get(this.store.getState(), 'terminal', {});
-        const newData = _.get(this.store.getState(), 'heartbeat', {});
+        let newData = _.get(this.store.getState(), 'heartbeat', {});
+        newData.authorization = authorization;
 
         if (_.isEqual(this.currentData, newData)) {
             return;
@@ -83,7 +86,7 @@ export default class Heartbeat {
             this._startHeartbeat();
         }
 
-        this.currentData = newData;
+        this.currentData = _.clone(newData);
     }
 
     _startHeartbeat() {
@@ -104,6 +107,8 @@ export default class Heartbeat {
             }
 
             const handleReject = error => {
+                this.requestTime = this.requestTime || 1000;
+
                 this.cancelToken = null;
 
                 if (debug) {
@@ -112,30 +117,31 @@ export default class Heartbeat {
 
                 if (online) {
                     this.store.dispatch(terminalOnlineAction(false));
-                    EventEmitter.emit(HEARTBEAT_RN_EVENT_FAIL, error);
+                    eventEmitter.emit(HEARTBEAT_RN_EVENT_FAIL, error);
                 }
 
                 if (!this.checkConnectionTimeout) {
                     this.checkConnectionTimeout = setTimeout(() => {
                         helper();
-                    }, 1500);
+                    }, next - this.requestTime * 2);
                 }
             };
 
-            const handleResponse = ({result, requestTime}) => {
+            const handleResponse = ({result, requestTime} = {}) => {
+                this.requestTime = requestTime;
                 this.cancelToken = null;
 
                 if (!online) {
-                    EventEmitter.emit(HEARTBEAT_RN_EVENT_RESUME, {
+                    eventEmitter.emit(HEARTBEAT_RN_EVENT_RESUME, {
                         duration: moment().valueOf() - lastOffline
                     });
 
-                    this.store.dispatch(terminalOnlineAction(false));
+                    this.store.dispatch(terminalOnlineAction(true));
                 }
                 if (!this.checkConnectionTimeout) {
                     this.checkConnectionTimeout = setTimeout(() => {
                         helper();
-                    }, next - requestTime * 2);
+                    }, next - this.requestTime * 2);
                 }
                 return Promise.resolve(result);
             };
@@ -144,7 +150,7 @@ export default class Heartbeat {
                 timestamp: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ')
             });
 
-            this.cancelToken = this.api.makeCancelToken;
+            this.cancelToken = this.api.makeCancelToken().token;
 
             this.api
                 .post({
@@ -195,7 +201,7 @@ export default class Heartbeat {
         }
 
         const {event, cd} = listeners[key];
-        EventEmitter.removeListener(event, cd);
+        eventEmitter.removeListener(event, cd);
 
         listeners[key] = null;
     }

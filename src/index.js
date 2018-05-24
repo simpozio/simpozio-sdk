@@ -1,4 +1,4 @@
-import Simpozio from './simpozio/constructor';
+import Simpozio from './simpozio/constructor.js';
 import Heartbeat from './heartbeat';
 
 export default class SimpozioWeb extends Simpozio {
