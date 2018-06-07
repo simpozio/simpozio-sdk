@@ -1,15 +1,15 @@
 import _ from 'lodash';
-import {HEARTBEAT_UPDATE} from './const';
+import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
 import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
 import moment from 'moment';
 
 const initialState = {
-    next: 5000,
-    screen: '',
-    state: 'active',
-    connection: '',
-    bandwidth: '',
-    payload: '',
+    next: HEARTBEAT_DEFAULT_NEXT,
+    screen: null,
+    state: HEARTBEAT_DEFAULT_STATE,
+    connection: null,
+    bandwidth: null,
+    payload: null,
     lastOffline: moment().valueOf()
 };
 
