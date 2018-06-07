@@ -10,13 +10,13 @@ import {
 } from './const';
 
 const initialState = {
-    authorization: '',
-    touchpoint: '',
-    userAgent: '',
+    authorization: null,
+    touchpoint: null,
+    userAgent: null,
     acceptLanguage: 'en_US',
     locale: 'en_US',
-    host: '',
-    xHttpMethodOverride: '',
+    host: null,
+    xHttpMethodOverride: null,
     baseUrl: API_DEFAULT_URL,
     terminalId: ObjectID.generate(),
     debug: false,
