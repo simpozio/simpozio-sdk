@@ -15,7 +15,7 @@ Updates heartbeat data for next tick
     }
 
 
-#### simpozio.Heartbeat.onResume(data: HeartbeatConfigObject): <void>
+#### simpozio.Heartbeat.onResume(function): <void>
 Updates heartbeat data for next tick
 
     type HeartbeatConfigObject =  {

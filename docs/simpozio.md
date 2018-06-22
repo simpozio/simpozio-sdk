@@ -8,6 +8,9 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
     
 ### ConfigObject
 
+### config.journeyId  [_required_]
+**{string}** id of the Journey for instance
+
 #### config.data 
 **{object}** Initial data (for static content)
 
@@ -18,7 +21,7 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
 **{string}** Touchpoint value
 
 #### config.terminalId
-**{string}** Explicit id of terminal 
+**{string}** Explicit id of terminal
 
 #### config.userAgent
 **{string}** ```User-Agent``` header value
@@ -59,7 +62,6 @@ Get an object
 
 #### simpozio.batch(requests: array): Promise<void>
 Submit a batch request
-
 
 #### simpozio.config(config: ConfigObject): <void>
 Update config of simpozio in runtime
