@@ -1,27 +1,47 @@
+// @flow
+
 import _ from 'lodash';
 import moment from 'moment';
 import EventEmitter from 'events';
+import {Store} from 'redux';
+import {CancelToken} from 'axios';
 
 import Logger from '../simpozio/logger';
 import Api from '../api';
+import type {SmpzApiResponseFullfilmentType} from '../api';
 import {terminalOnlineAction} from '../terminal/actions';
 import {heartbeatUpdateAction} from './actions';
 
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
+import type {SmpzGenericDataType} from '../simpozio/common.types';
+import type {SmpzHeartbeatModelType} from './reducer';
+import {AxiosError} from 'axios/index';
 
 const META = '_simpozioListenerId';
 const listeners = {};
 const eventEmitter = new EventEmitter();
 
+export type SmpzHeartbeatConstructorParamsType = {initialData?: SmpzHeartbeatModelType, store: Store};
+
 export default class Heartbeat {
-    constructor({initialData, store}) {
+    name: string;
+    _isStarted: boolean;
+    store: Store;
+    cancelToken: CancelToken;
+    checkConnectionTimeout: TimeoutID;
+    logger: Logger;
+    api: Api;
+    currentData: SmpzGenericDataType;
+    requestTime: number;
+
+    constructor({initialData, store}: SmpzHeartbeatConstructorParamsType) {
         this.name = 'Heartbeat';
         this._isStarted = false;
 
         this.store = store;
         this.cancelToken = null;
-        this.checkConnectionTimeout = 0;
+        this.checkConnectionTimeout;
         this.logger = new Logger({store, name: this.name});
         this.api = new Api({store});
         this.currentData = {};
@@ -31,9 +51,9 @@ export default class Heartbeat {
         this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
-    _getKey(listener) {
+    _getKey(listener: () => any): string {
         if (!listener) {
-            return;
+            return '';
         }
 
         if (!listener.hasOwnProperty(META)) {
@@ -49,7 +69,7 @@ export default class Heartbeat {
         return listener[META];
     }
 
-    addListener(event, cb) {
+    addListener(event: string, cb: () => mixed): string {
         let key = this._getKey(cb);
 
         eventEmitter.addListener(event, cb);
@@ -58,7 +78,7 @@ export default class Heartbeat {
         return key;
     }
 
-    _getMetadata() {
+    _getMetadata(): SmpzHeartbeatModelType {
         const {touchpoint} = _.get(this.store.getState(), 'terminal', {});
 
         const {state, screen, connection, bandwidth, payload, next} = _.get(this.store.getState(), 'heartbeat', {});
@@ -100,7 +120,7 @@ export default class Heartbeat {
         this._isStarted = true;
 
         const helper = () => {
-            this.checkConnectionTimeout = 0;
+            delete this.checkConnectionTimeout;
             const {authorization, online, debug} = _.get(this.store.getState(), 'terminal', {});
             const {next, lastOffline} = _.get(this.store.getState(), 'heartbeat', {});
 
@@ -109,7 +129,7 @@ export default class Heartbeat {
                 return;
             }
 
-            const handleReject = error => {
+            const handleReject = (error: AxiosError) => {
                 this.requestTime = this.requestTime || 1000;
 
                 this.cancelToken = null;
@@ -128,7 +148,9 @@ export default class Heartbeat {
                 }
             };
 
-            const handleResponse = ({result, requestTime} = {}) => {
+            const handleResponse = (
+                {result, requestTime}: SmpzApiResponseFullfilmentType = {}
+            ): Promise<?SmpzGenericDataType> => {
                 this.requestTime = requestTime;
                 this.cancelToken = null;
 
@@ -172,7 +194,7 @@ export default class Heartbeat {
     _stopHeartbeat() {
         if (this.checkConnectionTimeout) {
             clearTimeout(this.checkConnectionTimeout);
-            this.checkConnectionTimeout = 0;
+            delete this.checkConnectionTimeout;
         }
 
         if (this.cancelToken) {
@@ -182,23 +204,27 @@ export default class Heartbeat {
         this._isStarted = false;
     }
 
-    update(data) {
+    stop() {
+        this._stopHeartbeat();
+    }
+
+    update(data: SmpzHeartbeatModelType) {
         this.store.dispatch(heartbeatUpdateAction(data));
     }
 
-    onFail(cb) {
+    onFail(cb: () => mixed): string {
         return this.addListener(HEARTBEAT_RN_EVENT_FAIL, cb);
     }
 
-    onResume(cb) {
+    onResume(cb: () => mixed): string {
         return this.addListener(HEARTBEAT_RN_EVENT_RESUME, cb);
     }
 
-    onError(cb) {
+    onError(cb: () => mixed): string {
         return this.addListener(HEARTBEAT_RN_EVENT_EXCEPTION, cb);
     }
 
-    removeSubscription(key) {
+    removeSubscription(key: string) {
         if (!listeners[key]) {
             return;
         }
@@ -209,7 +235,7 @@ export default class Heartbeat {
         listeners[key] = null;
     }
 
-    isStarted() {
+    isStarted(): boolean {
         return this._isStarted;
     }
 }

@@ -15,7 +15,7 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
 **{object}** Initial data (for static content)
 
 #### config.baseUrl 
-**{string}** Url of Simpozio instance (default 'https://api.simpozio.com/v2')
+**{string}** Url of Smpz instance (default 'https://api.simpozio.com/v2')
 
 #### config.touchpoint
 **{string}** Touchpoint value

@@ -2,36 +2,11 @@
 
 ### Methods
 
-#### simpozio.Journey.next(): Promise
-Simpozio instance take current Itinerary and make map/reduce/apply steps 
+#### simpozio.Journey.addExperiencies(): object
+Add static experiences/interactions. Returns all experiences.
 
-Returns Promise which resolves with `nextStepData`
-```
-nextStepData : {
-    stage: string,
-    triggers: array, // Next triggers with weights  which should be triggered next
-    interactions: array // Interactions which should be done next 
-}
+#### simpozio.Journey.addTriggers(): object
+Add static triggers. Returns all triggers.
 
-``` 
-#### simpozio.Journey.onNext(callback: function): void
-Sets callback on every next step of journey
-
-Callback function will be called with `nextStepData`
-
-#### simpozio.Journey.useMapMiddleware(middleware: function): void
-Sets custom logic for Map step.
-
-`middleware` function will be called with `{itinerary}` object and must return `promise` which resolves with `{triggers}`
-
-#### simpozio.Journey.useReduceMiddleware(middleware: function): void
-Sets custom logic for Reduce step.
-
-`middleware` function will be called with `{itinerary}` object and must return `promise` which resolves with `{triggers}`
-
-#### simpozio.Journey.useApplyMiddleware(middleware: function): void
-Sets custom logic for Apply step.
-
-`middleware` function will be called with `{itinerary}` object and must return `promise` which resolves with `{triggers}`
-
-
+#### simpozio.Journey.addStages(): object
+Add static stages. Returns all stages.

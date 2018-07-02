@@ -1,19 +1,38 @@
+// @flow
+
 import _ from 'lodash';
-import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
-import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
 import moment from 'moment';
 
-const initialState = {
+import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
+import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
+import type {SmpzReduxActionType} from '../simpozio/common.types';
+import type {SmpzTerminalModelType} from '../terminal/reducer';
+
+export type SmpzHeartbeatModelType = {
+    touchpoint?: string,
+    state?: string,
+    screen?: string,
+    connection?: string,
+    bandwidth?: string,
+    payload?: string,
+    next?: string | number,
+    lastOffline?: number
+};
+
+const initialState: SmpzHeartbeatModelType = {
     next: HEARTBEAT_DEFAULT_NEXT,
-    screen: null,
+    screen: '',
     state: HEARTBEAT_DEFAULT_STATE,
-    connection: null,
-    bandwidth: null,
-    payload: null,
+    connection: '',
+    bandwidth: '',
+    payload: '',
     lastOffline: moment().valueOf()
 };
 
-export default (heartbeat = initialState, action) => {
+export default (
+    heartbeat: SmpzHeartbeatModelType = initialState,
+    action: SmpzReduxActionType
+): SmpzHeartbeatModelType => {
     switch (action.type) {
         case HEARTBEAT_UPDATE: {
             return _.assign({}, heartbeat, _.get(action, 'payload.data'));

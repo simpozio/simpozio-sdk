@@ -1,24 +1,35 @@
+// @flow
+
 import _ from 'lodash';
-import {createStore} from 'redux';
+import {createStore, Store} from 'redux';
 import reducers from './reducers';
 import {devToolsEnhancer} from 'redux-devtools-extension';
 import {terminalUpdateAction} from '../terminal/actions';
+import Heartbeat from '../heartbeat';
+import type {SmpzTerminalModelType} from '../terminal/reducer';
+import type {SmpzHeartbeatModelType} from '../heartbeat/reducer';
+
+export type SmpzParamsType = SmpzTerminalModelType & {
+    heartbeat: SmpzHeartbeatModelType
+};
+
+let SimpozioClassInstance: SimpozioClass | null = null;
 
 /**
  * Create new Simpozio SDK instance
  * By default make anonymous auth, starts heartbeat and trace
- * @param configObj
- * @param configObj.data {object} — initial data for store
- * @param configObj.baseUrl {string} — url of Simpozio instance ('https://api.simpozio.com/v2' by default)
- * @param configObj.heartbeat {object|boolean} — config for heartbeat or 'false' to avoid heartbeat
- * @param configObj.trace {object|boolean} — config for trace or 'false' to avoid trace
- * @returns {{Heartbeat, config}}
  */
 export default class SimpozioClass {
-    constructor(configObj, HeartbeatConstructor) {
+    name: string;
+    store: Store;
+    _type: string;
+    _created: Date;
+    Heartbeat: Heartbeat;
+
+    constructor(configObj: SmpzTerminalModelType, HeartbeatConstructor: Class<Heartbeat>): SimpozioClass {
         const {heartbeat} = _.get(configObj, 'data', {});
 
-        if (!SimpozioClass.instance) {
+        if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
             const store = createStore(reducers, {}, devToolsEnhancer());
             // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
@@ -36,22 +47,26 @@ export default class SimpozioClass {
 
             this.store.dispatch(terminalUpdateAction(configObj));
 
-            SimpozioClass.instance = this;
-        } else {
-            if (heartbeat === false) {
-                SimpozioClass.instance.Heartbeat.stop();
-            }
-            return SimpozioClass.instance;
+            SimpozioClassInstance = this;
         }
+
+        if (heartbeat === false) {
+            this.Heartbeat.stop();
+        }
+
+        this._type = 'SingletonModuleScopedInstance';
+        this._created = new Date();
+
+        return SimpozioClassInstance;
     }
 
-    config(configObj) {
+    config(configObj: SmpzParamsType) {
         const {heartbeat} = _.get(configObj, 'data', {});
 
         this.store.dispatch(terminalUpdateAction(configObj));
 
-        if (heartbeat) {
-            SimpozioClass.instance.Heartbeat.update(heartbeat);
+        if (SimpozioClassInstance && heartbeat) {
+            this.Heartbeat.update(heartbeat);
         }
     }
 }
