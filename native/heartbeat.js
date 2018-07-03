@@ -1,15 +1,30 @@
+// @flow
+
 import _ from 'lodash';
 import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
-import Heartbeat from '../src/heartbeat';
+import Heartbeat, {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
+import type {SmpzGenericDataType} from '../src/simpozio/common.types';
+import type {SmpzHeartbeatModelType} from '../src/heartbeat/reducer';
 
 const listeners = {};
 
+export type SmpzHeartbeatNativeModelType = {
+    baseUrl?: string,
+    headers?: {
+        Authorization: string,
+        'User-Agent': string,
+        'Accept-Language': string,
+        'X-HTTP-Method-Override': string
+    },
+    body: SmpzHeartbeatModelType
+};
+
 export default class HeartbeatNative extends Heartbeat {
-    constructor({initialData, store}) {
+    constructor({initialData, store}: SmpzHeartbeatConstructorParamsType) {
         super({initialData, store});
     }
 
-    addListener(event, cb) {
+    addListener(event: string, cb: () => mixed): string {
         let key = this._getKey(cb);
 
         listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
@@ -17,7 +32,7 @@ export default class HeartbeatNative extends Heartbeat {
         return key;
     }
 
-    _getMetadata() {
+    _getMetadata(): SmpzHeartbeatNativeModelType {
         const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
             this.store.getState(),
             'terminal',
@@ -62,7 +77,7 @@ export default class HeartbeatNative extends Heartbeat {
                         console.log('SDK HEARTBEAT STOPPED');
                     }
                 })
-                .catch(error => {
+                .catch((error: SmpzGenericDataType) => {
                     if (debug) {
                         console.log('SDK HEARTBEAT ERROR', error);
                     }
@@ -75,7 +90,7 @@ export default class HeartbeatNative extends Heartbeat {
                         console.log('SDK HEARTBEAT STARTED');
                     }
                 })
-                .catch(error => {
+                .catch((error: SmpzGenericDataType) => {
                     if (debug) {
                         console.log('SDK HEARTBEAT ERROR', error);
                     }
@@ -87,7 +102,7 @@ export default class HeartbeatNative extends Heartbeat {
         this.currentData = newData;
     }
 
-    removeSubscription(key) {
+    removeSubscription(key: string) {
         if (!listeners[key]) {
             return;
         }

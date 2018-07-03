@@ -5,8 +5,6 @@ import moment from 'moment';
 import EventEmitter from 'events';
 import {Store} from 'redux';
 import {CancelToken} from 'axios';
-import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
-
 
 import Logger from '../simpozio/logger';
 import Api from '../api';
@@ -24,12 +22,11 @@ const META = '_simpozioListenerId';
 const listeners = {};
 const eventEmitter = new EventEmitter();
 
-export type SmpzHeartbeatConstructorParamsType = { initialData?: SmpzHeartbeatModelType, store: Store, isNative: boolean };
+export type SmpzHeartbeatConstructorParamsType = {initialData?: SmpzHeartbeatModelType, store: Store};
 
 export default class Heartbeat {
     name: string;
     _isStarted: boolean;
-    isNative: boolean;
     store: Store;
     cancelToken: CancelToken;
     checkConnectionTimeout: TimeoutID;
@@ -38,10 +35,10 @@ export default class Heartbeat {
     currentData: SmpzGenericDataType;
     requestTime: number;
 
-    constructor({initialData,isNative = false, store}: SmpzHeartbeatConstructorParamsType) {
+    constructor({initialData, store}: SmpzHeartbeatConstructorParamsType) {
         this.name = 'Heartbeat';
         this._isStarted = false;
-        this.isNative = isNative;
+
         this.store = store;
         this.cancelToken = null;
         this.checkConnectionTimeout;
@@ -75,45 +72,27 @@ export default class Heartbeat {
     addListener(event: string, cb: () => mixed): string {
         let key = this._getKey(cb);
 
-        if (this.isNative) {
-            listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
-        } else {
-            eventEmitter.addListener(event, cb);
-            listeners[key] = {event, cb};
-        }
-
+        eventEmitter.addListener(event, cb);
+        listeners[key] = {event, cb};
 
         return key;
     }
 
-    _getMetadata = (): SmpzHeartbeatModelType => {
-        const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
-            this.store.getState(),
-            'terminal',
-            {}
-        );
+    _getMetadata(): SmpzHeartbeatModelType {
+        const {touchpoint} = _.get(this.store.getState(), 'terminal', {});
 
         const {state, screen, connection, bandwidth, payload, next} = _.get(this.store.getState(), 'heartbeat', {});
 
         return {
-            baseUrl,
-            headers: {
-                Authorization: authorization,
-                'User-Agent': userAgent,
-                'Accept-Language': acceptLanguage,
-                'X-HTTP-Method-Override': xHttpMethodOverride
-            },
-            body: {
-                touchpoint,
-                state,
-                screen,
-                connection,
-                bandwidth,
-                payload,
-                next
-            }
+            touchpoint,
+            state,
+            screen,
+            connection,
+            bandwidth,
+            payload,
+            next
         };
-    };
+    }
 
     _handleStoreChange() {
         const {authorization} = _.get(this.store.getState(), 'terminal', {});
@@ -126,31 +105,8 @@ export default class Heartbeat {
 
         if (newData === false || _.get(newData, 'next') === 0) {
             this._stopHeartbeat();
-            if (this.isNative) {
-                SimpozioBackgroundWorker.stopHeartbeat()
-                    .then(() => {
-                        this._isStarted = false;
-                        console.log('SDK HEARTBEAT STOPPED');
-                    })
-                    .catch(error => {
-                        console.log('SDK HEARTBEAT ERROR', error);
-                    });
-            }
         } else if (this._isStarted === false && authorization) {
             this._startHeartbeat();
-
-            if (this.isNative) {
-                SimpozioBackgroundWorker.startHeartbeat(this._getMetadata())
-                    .then(() => {
-                        this._isStarted = true;
-                        console.log('SDK HEARTBEAT STARTED');
-                    })
-                    .catch(error => {
-                        console.log('SDK HEARTBEAT ERROR', error);
-                    });
-            }
-        } else {
-            SimpozioBackgroundWorker.updateHeartbeat(this._getMetadata());
         }
 
         this.currentData = _.clone(newData);
@@ -215,7 +171,7 @@ export default class Heartbeat {
                 return Promise.resolve(result);
             };
 
-            const data = _.assign({}, _.get(this._getMetadata(), 'body'), {
+            const data = _.assign({}, this._getMetadata(), {
                 timestamp: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ')
             });
 
@@ -273,13 +229,8 @@ export default class Heartbeat {
             return;
         }
 
-        if (this.isNative) {
-            SimpozioBackgroundWorker.removeListener(key);
-        } else {
-            const {event, cd} = listeners[key];
-            eventEmitter.removeListener(event, cd);
-        }
-
+        const {event, cd} = listeners[key];
+        eventEmitter.removeListener(event, cd);
 
         listeners[key] = null;
     }
