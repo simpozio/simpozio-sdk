@@ -1,5 +1,5 @@
 # simpozio-sdk
-Smpz Javascript SDK
+Simpozio Javascript SDK
 
 
 
