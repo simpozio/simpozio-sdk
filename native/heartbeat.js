@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
 import Heartbeat, {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
-import type {SmpzGenericDataType} from '../src/simpozio/common.types';
+import type {SmpzGenericDataType} from '../src/simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from '../src/heartbeat/reducer';
 
 const listeners = {};

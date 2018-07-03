@@ -5,8 +5,7 @@ import moment from 'moment';
 
 import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
 import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
-import type {SmpzReduxActionType} from '../simpozio/common.types';
-import type {SmpzTerminalModelType} from '../terminal/reducer';
+import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 
 export type SmpzHeartbeatModelType = {
     touchpoint?: string,

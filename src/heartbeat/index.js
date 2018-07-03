@@ -14,7 +14,7 @@ import {heartbeatUpdateAction} from './actions';
 
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
 import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
-import type {SmpzGenericDataType} from '../simpozio/common.types';
+import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from './reducer';
 import {AxiosError} from 'axios/index';
 

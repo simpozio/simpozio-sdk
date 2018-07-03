@@ -10,7 +10,8 @@ import {
     API_DEFAULT_URL,
     TERMINAL_ONLINE_UPDATE
 } from './const';
-import type {SmpzReduxActionType} from '../simpozio/common.types';
+
+import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 
 export type SmpzTerminalModelType = {
     authorization?: string,

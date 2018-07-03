@@ -1,7 +1,7 @@
 // @flow
 
 import {TERMINAL_ONLINE_UPDATE, TERMINAL_UPDATE} from './const';
-import type {SmpzReduxActionType} from '../simpozio/common.types';
+import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 import type {SmpzTerminalModelType} from './reducer';
 
 export const terminalUpdateAction = (data?: SmpzTerminalModelType): SmpzReduxActionType => ({

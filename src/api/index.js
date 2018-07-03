@@ -4,7 +4,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import {AxiosInstance, CancelToken, CancelTokenSource} from 'axios';
 import {Store} from 'redux';
-import type {SmpzGenericDataType} from '../simpozio/common.types';
+import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios/index';
 
 export type SmpzApiRequestParamsType = {
