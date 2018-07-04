@@ -1,0 +1,2 @@
+export const TRIGGERS_ADD = 'TRIGGERS_ADD';
+export const TRIGGERS_REMOVE = 'TRIGGERS_REMOVE';

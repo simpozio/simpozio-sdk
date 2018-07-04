@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import reducer from './reducer.js';
+import reducer from '../reducer.js';
 import {
     HEARTBEAT_DEFAULT_NEXT,
     HEARTBEAT_DEFAULT_STATE,
@@ -7,15 +7,15 @@ import {
     TERMINAL_ACCESS_TOKEN_UPDATE,
     TERMINAL_ID_UPDATE,
     TERMINAL_UPDATE
-} from './const';
+} from '../const';
 import {
     TEST_DEFAULT_ISO_1,
     TEST_DEFAULT_ISO_2,
     TEST_DEFAULT_TIMESTAMP_1,
     TEST_STRING_1,
     TEST_STRING_2
-} from '../../__mocks__/consts';
-import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
+} from '../../../__mocks__/consts';
+import {TERMINAL_ONLINE_UPDATE} from '../../terminal/const';
 
 jest.mock('moment');
 

@@ -1,7 +1,7 @@
 import _ from 'lodash';
-import reducer from './reducer.js';
-import {TERMINAL_ACCESS_TOKEN_UPDATE, TERMINAL_ID_UPDATE, TERMINAL_ONLINE_UPDATE, TERMINAL_UPDATE} from './const';
-import {TEST_STRING_1, TEST_STRING_2} from '../../__mocks__/consts';
+import reducer from '../reducer.js';
+import {TERMINAL_ACCESS_TOKEN_UPDATE, TERMINAL_ID_UPDATE, TERMINAL_ONLINE_UPDATE, TERMINAL_UPDATE} from '../const';
+import {TEST_STRING_1, TEST_STRING_2} from '../../../__mocks__/consts';
 
 describe('Teminal', () => {
     test('Initial State', () => {

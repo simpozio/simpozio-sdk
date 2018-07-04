@@ -58,7 +58,7 @@ export default (
             const newItems = _.assign({}, activities.items, _.keyBy(newActivities, 'id'));
 
             const newOrder = _.chain(newItems)
-                .sortBy((item: SmpzActivityType): Array<SmpzActivityType> => getTimestampFromTimeframe(item))
+                .sortBy((item: SmpzActivityType): number => getTimestampFromTimeframe(item))
                 .map('id')
                 .valueOf();
 
