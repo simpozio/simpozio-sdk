@@ -14,7 +14,7 @@ const makeTrigger = id => ({
     ]
 });
 
-describe('Activities', () => {
+describe('Triggers', () => {
     test('Initial State', () => {
         const result = reducer(undefined, {type: 'INIT'});
         expect(_.get(result, 'items')).toBeDefined();
