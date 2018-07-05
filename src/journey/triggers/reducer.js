@@ -2,8 +2,8 @@
 import _ from 'lodash';
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from './const';
+import {NEXT_INVALIDATE} from '../../next/const';
 
-//
 export type SmpzTriggerType = {
     id: string,
     caption?: string,
@@ -19,10 +19,14 @@ export type SmpzTriggerType = {
 };
 
 export type SmpzTriggerCollectionType = {
+    suggest: Array<SmpzTriggerSuggestType>,
     items: {[key: string]: SmpzTriggerType}
 };
 
+export type SmpzTriggerSuggestType = {triggerId: string, rank: number};
+
 const initialState = {
+    suggest: [],
     items: {}
 };
 
@@ -45,6 +49,28 @@ export default (
 
             return _.assign({}, triggers, {
                 items: newItems
+            });
+        }
+        case NEXT_INVALIDATE: {
+            const interactionsDone = _.get(action, 'payload.interactions.done', {});
+
+            const suggest = _.chain(triggers)
+                .get('items')
+                .map((trigger: SmpzTriggerType): SmpzTriggerSuggestType | void => {
+                    const after = _.get(trigger, 'if.conditions.after');
+                    const {timestamp} = _.get(interactionsDone, after, {});
+
+                    if (_.isString(after) && timestamp) {
+                        // TODO: make right normalization
+                        return {triggerId: trigger.id, rank: 1 - (Date.now() - timestamp) / 10000000000};
+                    }
+                })
+                .compact()
+                .sort((trigger: SmpzTriggerSuggestType): number => trigger.rank)
+                .valueOf();
+
+            return _.assign({}, triggers, {
+                suggest
             });
         }
         default: {

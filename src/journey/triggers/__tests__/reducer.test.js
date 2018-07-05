@@ -1,18 +1,74 @@
 import _ from 'lodash';
 import reducer from '../reducer.js';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from '../const';
+import {NEXT_INVALIDATE} from '../../../next/const';
+import {ACTIVITIES_ADD} from '../../../itinerary/activities/const';
+import {EXPERIENCES_ADD} from '../../experiences/const';
 
 jest.unmock('moment');
 
-const makeTrigger = id => ({
+const makeTrigger = (id, after) => ({
     id: id,
     priority: 1,
+    if: {
+        conditions: {
+            after
+        }
+    },
     do: [
         {
             interaction: 'i_' + id
         }
     ]
 });
+
+const makeActivity = (id, timestamp, interaction) => ({
+    id: id,
+    actor: 'actor',
+    interaction: interaction,
+    trigger: 'trigger',
+    event: 'event',
+    timeframe: {
+        actual: {
+            start: timestamp
+        }
+    }
+});
+
+const makeInteraction = (id, data) =>
+    _.assign(
+        {},
+        {
+            id: id,
+            type: 'event'
+        },
+        data
+    );
+
+const makeComplexExperience = () =>
+    reducer(undefined, {
+        type: EXPERIENCES_ADD,
+        payload: {
+            experiences: [
+                makeInteraction('e1', {
+                    sequence: [makeInteraction('e2'), makeInteraction('e3')]
+                }),
+                makeInteraction('e4', {
+                    sequence: [
+                        makeInteraction('e5', {
+                            variants: [
+                                makeInteraction('e7'),
+                                makeInteraction('e8', {
+                                    choice: [makeInteraction('e9'), makeInteraction('e10')]
+                                })
+                            ]
+                        }),
+                        makeInteraction('e6')
+                    ]
+                })
+            ]
+        }
+    });
 
 describe('Triggers', () => {
     test('Initial State', () => {
@@ -97,5 +153,34 @@ describe('Triggers', () => {
         expect(_.get(result3, 'items.t3.id')).toBe('t3');
         expect(_.get(result3, 'items.t2')).toBeUndefined();
         expect(_.get(result3, 'items.t1')).toBeUndefined();
+    });
+
+    test(`${NEXT_INVALIDATE} after`, () => {
+        const result1 = reducer(undefined, {
+            type: TRIGGERS_ADD,
+            payload: {
+                triggers: [makeTrigger('t1', 'e1'), makeTrigger('t2', 'e2'), makeTrigger('t3', 'e3')]
+            }
+        });
+
+        const result2 = reducer(result1, {
+            type: NEXT_INVALIDATE,
+            payload: {
+                interactions: {
+                    done: {
+                        e1: {
+                            activity: 'a1',
+                            timestamp: Date.now() - 10000
+                        },
+                        e2: {
+                            activity: 'a2',
+                            timestamp: Date.now() - 20000
+                        }
+                    }
+                }
+            }
+        });
+
+        expect(_.map(result2.suggest, 'triggerId')).toEqual(['t2', 't1']);
     });
 });

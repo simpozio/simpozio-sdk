@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from './const';
 import {getTimestampFromTimeframe} from '../../simpozio/common/common.helpers';
 
-export type SmpzActivityType = {
+export type SmpzActivityModelType = {
     id: string,
     type: string,
     gravity?: number,
@@ -40,7 +40,7 @@ export type SmpzActivityType = {
 
 export type SmpzActivityCollectionType = {
     order: Array<string>,
-    items: {[key: string]: SmpzActivityType}
+    items: {[key: string]: SmpzActivityModelType}
 };
 
 const initialState = {
@@ -58,7 +58,7 @@ export default (
             const newItems = _.assign({}, activities.items, _.keyBy(newActivities, 'id'));
 
             const newOrder = _.chain(newItems)
-                .sortBy((item: SmpzActivityType): number => getTimestampFromTimeframe(item))
+                .sortBy((item: SmpzActivityModelType): number => getTimestampFromTimeframe(item))
                 .map('id')
                 .valueOf();
 

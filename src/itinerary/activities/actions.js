@@ -2,10 +2,10 @@
 
 import _ from 'lodash';
 import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from './const';
-import type {SmpzActivityType} from './reducer';
+import type {SmpzActivityModelType} from './reducer';
 import type {SmpzReduxActionType} from '../../simpozio/common/common.types';
 
-export const activivitesAddAction = (data?: SmpzActivityType | Array<SmpzActivityType>): SmpzReduxActionType => ({
+export const activivitesAddAction = (data?: SmpzActivityModelType | Array<SmpzActivityModelType>): SmpzReduxActionType => ({
     type: ACTIVITIES_ADD,
     payload: {
         activities: _.castArray(data)

@@ -2,9 +2,10 @@
 
 import _ from 'lodash';
 import Raven from 'raven-js';
-import {createStore, Store} from 'redux';
+import {createStore, Store, applyMiddleware} from 'redux';
+import thunk from 'redux-thunk';
 import reducers from './reducers';
-import {devToolsEnhancer} from 'redux-devtools-extension';
+import {composeWithDevTools} from 'redux-devtools-extension';
 import {terminalUpdateAction} from '../terminal/actions';
 import Heartbeat from '../heartbeat';
 import type {SmpzTerminalModelType} from '../terminal/reducer';
@@ -34,7 +35,8 @@ export default class SimpozioClass {
 
         if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
-            const store = createStore(reducers, {}, devToolsEnhancer());
+            const store = createStore(reducers, {}, composeWithDevTools(applyMiddleware(thunk)));
+
             // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
             // const Itinerary = new ItineraryConstructor({store, initialData: itinerary, isNative});
 

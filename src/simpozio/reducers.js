@@ -6,9 +6,9 @@ import triggers from '../journey/triggers/reducer';
 import interactions from '../journey/interactions/reducer';
 
 export default combineReducers({
+    activities,
+    interactions,
     terminal,
     heartbeat,
-    activities,
-    triggers,
-    interactions
+    triggers
 });

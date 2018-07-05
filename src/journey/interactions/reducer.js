@@ -2,10 +2,12 @@
 
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import _ from 'lodash';
-import {interactionLinking} from '../../simpozio/common/common.helpers';
+import {getTimestampFromTimeframe, interactionLinking} from '../../simpozio/common/common.helpers';
 import {INTERACTIONS_ADD, INTERACTIONS_REMOVE} from './const';
 import {EXPERIENCES_ADD, EXPERIENCES_REMOVE} from '../experiences/const';
 import type {SmpzExperiencesModelType} from '../experiences/reducer';
+import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from '../../itinerary/activities/const';
+import type {SmpzActivityModelType} from '../../itinerary/activities/reducer';
 
 export type SmpzInteractionModelType =
     | {
@@ -65,12 +67,16 @@ export type SmpzInteractionInputModelType = {
 };
 
 export type SmpzInteractionsCollectionType = {
+    done: SmpzInteractionDoneType,
     items: SmpzInteractionItemsType
 };
+
+export type SmpzInteractionDoneType = {[key: string]: {timestamp: number, activity: string}};
 
 export type SmpzInteractionItemsType = {[key: string]: SmpzInteractionModelType} | {};
 
 const initialState = {
+    done: {},
     items: {}
 };
 
@@ -187,6 +193,39 @@ export default (
 
             return _.assign({}, interactions, {
                 items: newItems
+            });
+        }
+        case ACTIVITIES_ADD: {
+            const newActivities = _.castArray(_.get(action, 'payload.activities', []));
+
+            return _.assign({}, interactions, {
+                done: _.assign(
+                    {},
+                    interactions.done,
+                    _.reduce(
+                        newActivities,
+                        (acc: SmpzInteractionDoneType, activity: SmpzActivityModelType): SmpzInteractionDoneType =>
+                            _.assign({}, acc, {
+                                [activity.interaction]: {
+                                    timestamp: getTimestampFromTimeframe(activity),
+                                    activity: activity.id
+                                }
+                            }),
+                        {}
+                    )
+                )
+            });
+        }
+        case ACTIVITIES_REMOVE: {
+            const activities = _.get(action, 'payload.activities', []);
+
+            return _.assign({}, interactions, {
+                done: _.reduce(
+                    activities,
+                    (items: SmpzInteractionDoneType, activityId: string): SmpzInteractionDoneType =>
+                        _.omitBy(items, ({activity}: SmpzInteractionDoneType): boolean => activityId === activity),
+                    interactions.done
+                )
             });
         }
         default: {

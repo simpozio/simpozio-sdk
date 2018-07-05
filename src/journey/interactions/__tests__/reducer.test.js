@@ -2,6 +2,7 @@ import _ from 'lodash';
 import reducer from '../reducer.js';
 import {INTERACTIONS_ADD, INTERACTIONS_REMOVE} from '../const';
 import {EXPERIENCES_ADD, EXPERIENCES_REMOVE} from '../../experiences/const';
+import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from '../../../itinerary/activities/const';
 
 jest.unmock('moment');
 
@@ -14,6 +15,31 @@ const makeInteraction = (id, data) =>
         },
         data
     );
+
+const makeComplexExperience = () =>
+    reducer(undefined, {
+        type: EXPERIENCES_ADD,
+        payload: {
+            experiences: [
+                makeInteraction('e1', {
+                    sequence: [makeInteraction('e2'), makeInteraction('e3')]
+                }),
+                makeInteraction('e4', {
+                    sequence: [
+                        makeInteraction('e5', {
+                            variants: [
+                                makeInteraction('e7'),
+                                makeInteraction('e8', {
+                                    choice: [makeInteraction('e9'), makeInteraction('e10')]
+                                })
+                            ]
+                        }),
+                        makeInteraction('e6')
+                    ]
+                })
+            ]
+        }
+    });
 
 describe('Interactions', () => {
     test('Initial State', () => {
@@ -115,29 +141,7 @@ describe('Interactions', () => {
     });
 
     test(EXPERIENCES_ADD, () => {
-        const result1 = reducer(undefined, {
-            type: EXPERIENCES_ADD,
-            payload: {
-                experiences: [
-                    makeInteraction('e1', {
-                        sequence: [makeInteraction('e2'), makeInteraction('e3')]
-                    }),
-                    makeInteraction('e4', {
-                        sequence: [
-                            makeInteraction('e5', {
-                                variants: [
-                                    makeInteraction('e7'),
-                                    makeInteraction('e8', {
-                                        choice: [makeInteraction('e9'), makeInteraction('e10')]
-                                    })
-                                ]
-                            }),
-                            makeInteraction('e6')
-                        ]
-                    })
-                ]
-            }
-        });
+        const result1 = makeComplexExperience();
 
         expect(_.every(['e2', 'e3', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10'], id => _.get(result1, 'items.' + id))).toEqual(
             true
@@ -146,29 +150,8 @@ describe('Interactions', () => {
     });
 
     test(EXPERIENCES_REMOVE, () => {
-        const result1 = reducer(undefined, {
-            type: EXPERIENCES_ADD,
-            payload: {
-                experiences: [
-                    makeInteraction('e1', {
-                        sequence: [makeInteraction('e2'), makeInteraction('e3')]
-                    }),
-                    makeInteraction('e4', {
-                        sequence: [
-                            makeInteraction('e5', {
-                                variants: [
-                                    makeInteraction('e7'),
-                                    makeInteraction('e8', {
-                                        choice: [makeInteraction('e9'), makeInteraction('e10')]
-                                    })
-                                ]
-                            }),
-                            makeInteraction('e6')
-                        ]
-                    })
-                ]
-            }
-        });
+        const result1 = makeComplexExperience();
+
         const result2 = reducer(result1, {
             type: EXPERIENCES_REMOVE,
             payload: {
@@ -176,8 +159,60 @@ describe('Interactions', () => {
             }
         });
 
-        console.log(result2);
-
         expect(_.every(['e2', 'e3'], id => _.get(result2, 'items.' + id))).toEqual(true);
+    });
+
+    test(ACTIVITIES_ADD, () => {
+        const result1 = makeComplexExperience();
+
+        const result2 = reducer(result1, {
+            type: ACTIVITIES_ADD,
+            payload: {
+                activities: {
+                    id: 'a1',
+                    type: 'event',
+                    actor: 'u1',
+                    timeframe: {
+                        actual: {
+                            start: 123
+                        }
+                    },
+                    interaction: 'e2'
+                }
+            }
+        });
+
+        expect(_.get(result2, 'done.e2.timestamp')).toEqual(123);
+        expect(_.get(result2, 'done.e2.activity')).toEqual('a1');
+    });
+
+    test(ACTIVITIES_ADD, () => {
+        const result1 = makeComplexExperience();
+
+        const result2 = reducer(result1, {
+            type: ACTIVITIES_ADD,
+            payload: {
+                activities: {
+                    id: 'a1',
+                    type: 'event',
+                    actor: 'u1',
+                    timeframe: {
+                        actual: {
+                            start: 123
+                        }
+                    },
+                    interaction: 'e2'
+                }
+            }
+        });
+
+        const result3 = reducer(result2, {
+            type: ACTIVITIES_REMOVE,
+            payload: {
+                activities: ['a1']
+            }
+        });
+
+        expect(_.get(result3, 'done.e2')).toBeUndefined();
     });
 });
