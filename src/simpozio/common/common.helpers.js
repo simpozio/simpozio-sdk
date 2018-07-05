@@ -16,15 +16,13 @@ export const getTimestampFromTimeframe = (item: mixed): number => {
     return timestamp;
 };
 
-export const interactionLinking = (
-    interaction: SmpzInteractionModelType | SmpzExperiencesModelType
-): SmpzInteractionModelType | SmpzExperiencesModelType => {
+export const interactionLinking = (interaction: SmpzInteractionModelType): SmpzInteractionModelType => {
     let sequence;
     let variants;
     let choice;
 
-    const linkItem = (interaction: SmpzInteractionModelType): string | SmpzInteractionModelType =>
-        interaction.id ? interaction.id : interaction;
+    const linkItem = (interaction: SmpzInteractionModelType | string): string | SmpzInteractionModelType =>
+        typeof interaction !== 'string' && interaction.id ? interaction.id : interaction;
 
     if (interaction.sequence) {
         sequence = _.map(interaction.sequence, linkItem);
@@ -38,9 +36,17 @@ export const interactionLinking = (
         choice = _.map(interaction.choice, linkItem);
     }
 
-    return _.assign({}, interaction, {
-        sequence,
-        variants,
-        choice
-    });
+    return _.assign(
+        {},
+        interaction,
+        sequence && {
+            sequence
+        },
+        variants && {
+            variants
+        },
+        choice && {
+            choice
+        }
+    );
 };

@@ -22,9 +22,9 @@ export type SmpzExperiencesModelType = {
     // prettier-ignore
     duration?: number | string | {| min?: number | string, max?: number | string |},
 
-    sequence?: Array<SmpzInteractionModelType>,
-    variants?: Array<SmpzInteractionModelType>,
-    choice?: Array<SmpzInteractionModelType>
+    sequence?: Array<SmpzInteractionModelType> | Array<string>,
+    variants?: Array<SmpzInteractionModelType> | Array<string>,
+    choice?: Array<SmpzInteractionModelType> | Array<string>
 };
 
 export type SmpzExperiencesCollectionType = {
