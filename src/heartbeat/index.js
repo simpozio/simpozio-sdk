@@ -17,8 +17,8 @@ import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
 import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from './reducer';
 import {AxiosError} from 'axios/index';
+import {getListenerKey} from '../simpozio/common/common.helpers';
 
-const META = '_simpozioListenerId';
 const listeners = {};
 const eventEmitter = new EventEmitter();
 
@@ -51,26 +51,8 @@ export default class Heartbeat {
         this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
-    _getKey(listener: () => any): string {
-        if (!listener) {
-            return '';
-        }
-
-        if (!listener.hasOwnProperty(META)) {
-            if (!Object.isExtensible(listener)) {
-                return 'F';
-            }
-
-            Object.defineProperty(listener, META, {
-                value: _.uniqueId('SIMPOZIO_LISTENER_')
-            });
-        }
-
-        return listener[META];
-    }
-
     addListener(event: string, cb: () => mixed): string {
-        let key = this._getKey(cb);
+        let key = getListenerKey(cb);
 
         eventEmitter.addListener(event, cb);
         listeners[key] = {event, cb};

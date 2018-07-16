@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import type {SmpzInteractionModelType} from '../../journey/interactions/reducer';
-import type {SmpzExperiencesModelType} from '../../journey/experiences/reducer';
+import {LISTENER_META} from './common.consts';
 
 export const getTimestampFromTimeframe = (item: mixed): number => {
     const timeframe = _.get(item, 'timeframe');
@@ -49,4 +49,22 @@ export const interactionLinking = (interaction: SmpzInteractionModelType): SmpzI
             choice
         }
     );
+};
+
+export const getListenerKey = (listener: () => any): string => {
+    if (!listener) {
+        return '';
+    }
+
+    if (!listener.hasOwnProperty(LISTENER_META)) {
+        if (!Object.isExtensible(listener)) {
+            return 'F';
+        }
+
+        Object.defineProperty(listener, LISTENER_META, {
+            value: _.uniqueId('SIMPOZIO_LISTENER_')
+        });
+    }
+
+    return listener[LISTENER_META];
 };

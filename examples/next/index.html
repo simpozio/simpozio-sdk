@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Constructor</title>
+</head>
+<body>
+<script src="../init.js"></script>
+<script>
+    window.onload = () => {
+        simpozio = new SimpozioClass({
+            debug: true,
+            authorization:
+                'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MzA4OTY0NjMsImV4cGlyZXMiOjE1NTY4MTY0NjN9.jlbShA0_epqRl5s_h1kaLUi2pubmFCHkPvp7Up_kTUo',
+            userAgent:
+                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/66.0.3359.117 Safari/537.36',
+            heartbeat: {
+                screen: 'main'
+            }
+        });
+    }
+</script>
+</body>
+</html>

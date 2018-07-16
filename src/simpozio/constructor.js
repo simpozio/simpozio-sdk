@@ -8,6 +8,9 @@ import reducers from './reducers';
 import {composeWithDevTools} from 'redux-devtools-extension';
 import {terminalUpdateAction} from '../terminal/actions';
 import Heartbeat from '../heartbeat';
+import JourneyConstructor from '../journey';
+import ItineraryConstructor from '../itinerary';
+import NextConstructor from '../next';
 import type {SmpzTerminalModelType} from '../terminal/reducer';
 import type {SmpzHeartbeatModelType} from '../heartbeat/reducer';
 
@@ -29,6 +32,9 @@ export default class SimpozioClass {
     _type: string;
     _created: Date;
     Heartbeat: Heartbeat;
+    Journey: JourneyConstructor;
+    Next: NextConstructor;
+    Itinerary: ItineraryConstructor;
 
     constructor(configObj: SmpzTerminalModelType, HeartbeatConstructor: Class<Heartbeat>): SimpozioClass {
         const {heartbeat} = _.get(configObj, 'data', {});
@@ -37,11 +43,13 @@ export default class SimpozioClass {
             this.name = 'Simpozio';
             const store = createStore(reducers, {}, composeWithDevTools(applyMiddleware(thunk)));
 
-            // const Journey = new JourneyConstructor({store, initialData: journeys, isNative});
-            // const Itinerary = new ItineraryConstructor({store, initialData: itinerary, isNative});
+            const Journey = new JourneyConstructor({store});
+            const Itinerary = new ItineraryConstructor({store});
+            const Next = new NextConstructor({store});
 
-            // this.Journey = Journey;
-            // this.Itinerary = Itinerary;
+            this.Journey = Journey;
+            this.Itinerary = Itinerary;
+            this.Next = Next;
 
             this.store = store;
 

@@ -3,42 +3,47 @@
 import _ from 'lodash';
 import {Dispatch, Store} from 'redux';
 import {NEXT_INVALIDATE} from './const';
-import type {SmpzTriggerType} from '../journey/triggers/reducer';
 import {TRIGGERS_ADD} from '../journey/triggers/const';
 
-export const nextInvalidate = ({
-    mapMiddleware,
-    reduceMiddleware
-}: {
-    mapMiddleware: Function,
-    reduceMiddleware: Function
-}): Function => {
+import type {SmpzTriggerCollectionType, SmpzTriggerType} from '../journey/triggers/reducer';
+import type {SmpzInteractionsCollectionType} from '../journey/interactions/reducer';
+import type {SmpzActivityCollectionType} from '../itinerary/activities/reducer';
+import type {SmpzExperiencesCollectionType} from '../journey/experiences/reducer';
+import type {SmpzTerminalModelType} from '../terminal/reducer';
+
+export type SmpzContextType = {
+    interactions: SmpzInteractionsCollectionType,
+    triggers: SmpzTriggerCollectionType,
+    activities: SmpzActivityCollectionType,
+    experiences: SmpzExperiencesCollectionType,
+    terminal: SmpzTerminalModelType
+};
+
+const makeContext = (state: Store): SmpzContextType => ({
+    interactions: state.interactions,
+    triggers: state.triggers,
+    activities: state.activities,
+    experiences: state.experiences,
+    terminal: state.terminal
+});
+
+export const nextInvalidate = (
+    params?: {
+        mapMiddleware?: Function,
+        reduceMiddleware?: Function
+    } = {}
+): Function => {
+    const {mapMiddleware, reduceMiddleware} = params;
     return (dispatch: Dispatch, getState: () => Store): Promise<mixed> => {
         const invalidate = (): Promise<void> => {
-            const state = getState();
-
             return dispatch({
                 type: NEXT_INVALIDATE,
-                payload: {
-                    interactions: state.interactions,
-                    triggers: state.triggers,
-                    activities: state.activities,
-                    experiences: state.experiences,
-                    terminal: state.terminal
-                }
+                payload: makeContext(getState())
             });
         };
 
         if (mapMiddleware) {
-            const state = getState();
-
-            return mapMiddleware({
-                interactions: state.interactions,
-                triggers: state.triggers,
-                activities: state.activities,
-                experiences: state.experiences,
-                terminal: state.terminal
-            })
+            return mapMiddleware(makeContext(getState()))
                 .then(({triggers}: {triggers: Array<SmpzTriggerType>}): Promise<{triggers: SmpzTriggerType}> => {
                     const state = getState();
 
@@ -50,13 +55,7 @@ export const nextInvalidate = ({
                     });
 
                     if (reduceMiddleware) {
-                        return reduceMiddleware({
-                            interactions: state.interactions,
-                            triggers: state.triggers,
-                            activities: state.activities,
-                            experiences: state.experiences,
-                            terminal: state.terminal
-                        });
+                        return reduceMiddleware(makeContext(getState()));
                     }
 
                     return Promise.resolve({triggers: _.get(state, 'triggers.items')});
@@ -72,15 +71,9 @@ export const nextInvalidate = ({
                     return invalidate();
                 });
         } else if (reduceMiddleware) {
-            const state = getState();
-
-            return reduceMiddleware({
-                interactions: state.interactions,
-                triggers: state.triggers,
-                activities: state.activities,
-                experiences: state.experiences,
-                terminal: state.terminal
-            }).then(({triggers}: {triggers: Array<SmpzTriggerType>}): Promise<mixed> => {
+            return reduceMiddleware(
+                makeContext(getState())
+            ).then(({triggers}: {triggers: Array<SmpzTriggerType>}): Promise<mixed> => {
                 dispatch({
                     type: TRIGGERS_ADD,
                     payload: {

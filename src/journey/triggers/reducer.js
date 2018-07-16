@@ -53,16 +53,23 @@ export default (
         }
         case NEXT_INVALIDATE: {
             const interactionsDone = _.get(action, 'payload.interactions.done', {});
+            const activities = _.get(action, 'payload.activities.items', {});
 
             const suggest = _.chain(triggers)
                 .get('items')
                 .map((trigger: SmpzTriggerType): SmpzTriggerSuggestType | void => {
-                    const after = _.get(trigger, 'if.conditions.after');
-                    const {timestamp} = _.get(interactionsDone, after, {});
+                    const after = _.get(trigger, 'if.conditions.after', {});
+                    const {timestamp, activity: activityId} = _.get(interactionsDone, after, {});
+                    const {input, interaction: activityInteraction} = _.get(activities, activityId, {});
 
                     if (_.isString(after) && timestamp) {
                         // TODO: make right normalization
                         return {triggerId: trigger.id, rank: 1 - (Date.now() - timestamp) / 10000000000};
+                    } else if (_.isObject(after) && timestamp) {
+                        const {interaction, choice} = after;
+                        if (choice === input && activityInteraction === interaction) {
+                            return {triggerId: trigger.id, rank: 1 - (Date.now() - timestamp) / 10000000000};
+                        }
                     }
                 })
                 .compact()
@@ -70,7 +77,10 @@ export default (
                 .valueOf();
 
             return _.assign({}, triggers, {
-                suggest
+                suggest: {
+                    lastUpdate: Date.now(),
+                    items: suggest
+                }
             });
         }
         default: {

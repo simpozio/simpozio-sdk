@@ -2,7 +2,6 @@ import _ from 'lodash';
 import reducer from '../reducer.js';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from '../const';
 import {NEXT_INVALIDATE} from '../../../next/const';
-import {ACTIVITIES_ADD} from '../../../itinerary/activities/const';
 import {EXPERIENCES_ADD} from '../../experiences/const';
 
 jest.unmock('moment');
@@ -181,6 +180,6 @@ describe('Triggers', () => {
             }
         });
 
-        expect(_.map(result2.suggest, 'triggerId')).toEqual(['t2', 't1']);
+        expect(_.map(result2.suggest.items, 'triggerId')).toEqual(['t2', 't1']);
     });
 });

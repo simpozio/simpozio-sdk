@@ -6,6 +6,7 @@ import Heartbeat from '../src/heartbeat';
 import type {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
 import type {SmpzGenericDataType} from '../src/simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from '../src/heartbeat/reducer';
+import {getListenerKey} from "../src/simpozio/common/common.helpers";
 
 const listeners = {};
 
@@ -26,7 +27,7 @@ export default class HeartbeatNative extends Heartbeat {
     }
 
     addListener(event: string, cb: () => mixed): string {
-        let key = this._getKey(cb);
+        let key = getListenerKey(cb);
 
         listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
 

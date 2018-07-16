@@ -5,7 +5,7 @@ import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from './const';
 import {getTimestampFromTimeframe} from '../../simpozio/common/common.helpers';
 
 export type SmpzActivityModelType = {
-    id: string,
+    id?: string,
     type: string,
     gravity?: number,
     actor: string,
