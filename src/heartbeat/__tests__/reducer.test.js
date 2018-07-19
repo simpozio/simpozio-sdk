@@ -15,7 +15,7 @@ import {
     TEST_STRING_1,
     TEST_STRING_2
 } from '../../../__mocks__/consts';
-import {TERMINAL_ONLINE_UPDATE} from '../../terminal/const';
+import {TERMINAL_ONLINE_UPDATE} from '../../_terminal/const';
 
 jest.mock('moment');
 

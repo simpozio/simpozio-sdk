@@ -9,7 +9,7 @@ import type {SmpzTriggerCollectionType, SmpzTriggerType} from '../journey/trigge
 import type {SmpzInteractionsCollectionType} from '../journey/interactions/reducer';
 import type {SmpzActivityCollectionType} from '../itinerary/activities/reducer';
 import type {SmpzExperiencesCollectionType} from '../journey/experiences/reducer';
-import type {SmpzTerminalModelType} from '../terminal/reducer';
+import type {SmpzTerminalModelType} from '../_terminal/reducer';
 
 export type SmpzContextType = {
     interactions: SmpzInteractionsCollectionType,

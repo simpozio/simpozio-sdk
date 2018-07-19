@@ -4,7 +4,7 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
-import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
+import {TERMINAL_ONLINE_UPDATE} from '../_terminal/const';
 import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 
 export type SmpzHeartbeatModelType = {

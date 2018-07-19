@@ -39,11 +39,13 @@ export type SmpzActivityModelType = {
 };
 
 export type SmpzActivityCollectionType = {
+    lastUpdate: number,
     order: Array<string>,
     items: {[key: string]: SmpzActivityModelType}
 };
 
 const initialState = {
+    lastUpdate: 0,
     order: [],
     items: {}
 };
@@ -63,6 +65,7 @@ export default (
                 .valueOf();
 
             return _.assign({}, activities, {
+                lastUpdate: Date.now(),
                 order: newOrder,
                 items: newItems
             });
@@ -73,6 +76,7 @@ export default (
             const newOrder = _.difference(activities.order, newActivities);
 
             return _.assign({}, activities, {
+                lastUpdate: Date.now(),
                 order: newOrder,
                 items: newItems
             });

@@ -19,14 +19,22 @@ export type SmpzTriggerType = {
 };
 
 export type SmpzTriggerCollectionType = {
-    suggest: Array<SmpzTriggerSuggestType>,
+    lastUpdate: number,
+    suggest: {
+        lastUpdate: number,
+        items: Array<SmpzTriggerSuggestType>
+    },
     items: {[key: string]: SmpzTriggerType}
 };
 
 export type SmpzTriggerSuggestType = {triggerId: string, rank: number};
 
 const initialState = {
-    suggest: [],
+    lastUpdate: 0,
+    suggest: {
+        lastUpdate: 0,
+        items: []
+    },
     items: {}
 };
 
@@ -40,6 +48,7 @@ export default (
             const newItems = _.assign({}, triggers.items, _.keyBy(newTriggers, 'id'));
 
             return _.assign({}, triggers, {
+                lastUpdate: Date.now(),
                 items: newItems
             });
         }
@@ -48,6 +57,7 @@ export default (
             const newItems = _.omit(triggers.items, newTriggers);
 
             return _.assign({}, triggers, {
+                lastUpdate: Date.now(),
                 items: newItems
             });
         }

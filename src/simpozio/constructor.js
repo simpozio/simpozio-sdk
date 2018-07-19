@@ -6,12 +6,12 @@ import {createStore, Store, applyMiddleware} from 'redux';
 import thunk from 'redux-thunk';
 import reducers from './reducers';
 import {composeWithDevTools} from 'redux-devtools-extension';
-import {terminalUpdateAction} from '../terminal/actions';
+import {terminalUpdateAction} from '../_terminal/actions';
 import Heartbeat from '../heartbeat';
 import JourneyConstructor from '../journey';
 import ItineraryConstructor from '../itinerary';
 import NextConstructor from '../next';
-import type {SmpzTerminalModelType} from '../terminal/reducer';
+import type {SmpzTerminalModelType} from '../_terminal/reducer';
 import type {SmpzHeartbeatModelType} from '../heartbeat/reducer';
 
 Raven.config('https://7dfca467185c47b3b4d19ff309609a93@sentry.io/422986').install();
@@ -42,17 +42,11 @@ export default class SimpozioClass {
         if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
             const store = createStore(reducers, {}, composeWithDevTools(applyMiddleware(thunk)));
-
-            const Journey = new JourneyConstructor({store});
-            const Itinerary = new ItineraryConstructor({store});
-            const Next = new NextConstructor({store});
-
-            this.Journey = Journey;
-            this.Itinerary = Itinerary;
-            this.Next = Next;
-
             this.store = store;
 
+            this.Journey = new JourneyConstructor({store});
+            this.Itinerary = new ItineraryConstructor({store});
+            this.Next = new NextConstructor({store});
             this.Heartbeat = new HeartbeatConstructor({
                 store,
                 initialData: _.get(configObj, 'heartbeat', {})

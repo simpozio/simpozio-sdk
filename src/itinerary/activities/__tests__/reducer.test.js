@@ -43,6 +43,17 @@ describe('Activities', () => {
         expect(_.get(result2, 'items.a2.id')).toBe('a2');
     });
 
+    test(`${ACTIVITIES_ADD} lastUpdate`, () => {
+        const result1 = reducer(undefined, {
+            type: ACTIVITIES_ADD,
+            payload: {
+                activities: makeActivity('1', '2018-07-03T15:31:34.660Z')
+            }
+        });
+
+        expect(_.get(result1, 'lastUpdate')).toBeGreaterThan(0);
+    });
+
     test(`${ACTIVITIES_ADD} Array`, () => {
         const result1 = reducer(undefined, {
             type: ACTIVITIES_ADD,
@@ -92,6 +103,17 @@ describe('Activities', () => {
 
         expect(_.get(result3, 'order')).toEqual(['a3', 'a2']);
         expect(_.get(result3, 'items.a2.id')).toBe('a2');
+    });
+
+    test(`${ACTIVITIES_REMOVE} lastUpdate`, () => {
+        const result1 = reducer(undefined, {
+            type: ACTIVITIES_REMOVE,
+            payload: {
+                activities: makeActivity('1', '2018-07-03T15:31:34.660Z')
+            }
+        });
+
+        expect(_.get(result1, 'lastUpdate')).toBeGreaterThan(0);
     });
 
     test(`${ACTIVITIES_REMOVE} Array`, () => {

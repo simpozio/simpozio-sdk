@@ -5,7 +5,7 @@ import EventEmitter from 'events';
 import {Store} from 'redux';
 
 import Logger from '../simpozio/logger';
-import Api from '../api';
+import Api from '../_api';
 import {getListenerKey} from '../simpozio/common/common.helpers';
 import {nextInvalidate} from './actions';
 import {NEXT_EVENT, NEXT_INVALIDATE_EVENT} from './const';
@@ -23,25 +23,33 @@ export default class Next {
     mapMiddleware: Function;
     reduceMiddleware: Function;
     lastInvalidate: number;
+    lastActivityUpdate: number;
     lastNext: number;
 
     constructor({store}: SmpzNextConstructorParamsType) {
+        const state = store.getState();
         this.name = 'Next';
 
         this.store = store;
         this.logger = new Logger({store, name: this.name});
         this.api = new Api({store});
-        this.lastInvalidate = _.get(this.store.getState(), 'next.lastInvalidate');
+        this.lastInvalidate = _.get(state, 'next.lastInvalidate');
+        this.lastActivityUpdate = _.get(state, 'activities.lastUpdate');
 
         this.store.subscribe(this._handleStoreChange.bind(this));
     }
 
     _handleStoreChange() {
         const {lastInvalidate, lastNext} = _.get(this.store.getState(), 'next', {});
+        const {lastUpdate: lastActivityUpdate} = _.get(this.store.getState(), 'activities', {});
 
         if (this.lastInvalidate !== lastInvalidate) {
             this.lastInvalidate = lastInvalidate;
             eventEmitter.emit(NEXT_INVALIDATE_EVENT);
+        }
+
+        if (this.lastActivityUpdate !== lastActivityUpdate) {
+            this.invalidate();
         }
 
         if (this.lastNext !== lastNext) {

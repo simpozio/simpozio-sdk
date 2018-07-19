@@ -7,13 +7,13 @@ import {Store} from 'redux';
 import {CancelToken} from 'axios';
 
 import Logger from '../simpozio/logger';
-import Api from '../api';
-import type {SmpzApiResponseFullfilmentType} from '../api';
-import {terminalOnlineAction} from '../terminal/actions';
+import Api from '../_api';
+import type {SmpzApiResponseFullfilmentType} from '../_api';
+import {terminalOnlineAction} from '../_terminal/actions';
 import {heartbeatUpdateAction} from './actions';
 
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
-import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
+import {API_HEARTBEAT, API_SIGNALS} from '../_api/const';
 import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from './reducer';
 import {AxiosError} from 'axios/index';

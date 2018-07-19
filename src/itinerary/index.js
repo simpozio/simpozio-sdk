@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {Store} from 'redux';
 
 import Logger from '../simpozio/logger';
-import Api from '../api';
+import Api from '../_api';
 import type {SmpzActivityModelType} from './activities/reducer';
 import {activitiesAddAction} from './activities/actions';
 
