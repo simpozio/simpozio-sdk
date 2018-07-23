@@ -3,6 +3,7 @@
     "version": "0.0.1",
     "scripts": {
         "postinstall": "npx gulp",
+        "dev": "npx gulp; npx gulp watch",
         "test": "npx jest --silent; npx flow;",
         "flow": "npx flow"
     },
@@ -25,14 +26,16 @@
         "redux-persist": "^5.10.0",
         "redux-thunk": "^2.3.0",
         "reselect": "^3.0.1",
-        "react-native-simpozio-background-worker":
-            "git@github.com:smekalka/react-native-simpozio-background-worker.git",
+        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git",
         "webpack": "^4.14.0",
         "webpack-cli": "^3.0.8"
     },
     "main": "./dist",
     "babel": {
-        "presets": ["env", "flow"]
+        "presets": [
+            "env",
+            "flow"
+        ]
     },
     "devDependencies": {
         "eslint-plugin-flowtype": "^2.49.3"
