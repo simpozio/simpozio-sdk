@@ -19,7 +19,7 @@ export type SmpzContextType = {
     terminal: SmpzTerminalModelType
 };
 
-const makeContext = (state: Store): SmpzContextType => ({
+const makeContext = (state: Store = {}): SmpzContextType => ({
     interactions: state.interactions,
     triggers: state.triggers,
     activities: state.activities,

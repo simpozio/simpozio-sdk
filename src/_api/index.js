@@ -1,18 +1,22 @@
 // @flow
 
+import _ from 'lodash';
 import axios from 'axios';
 import {AxiosInstance, CancelToken, CancelTokenSource} from 'axios';
 import {Store} from 'redux';
 import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import {requestHelper} from './requestHelper';
+import type {SmpzTerminalModelType} from '../_terminal/reducer';
 
 export type SmpzApiRequestParamsType = {
     url?: string,
-    data?: SmpzGenericDataType,
-    params?: SmpzGenericDataType,
+    data?: any,
+    params?: any,
     headers?: {[key: string]: string},
     timeout?: number,
-    cancelToken?: CancelToken
+    cancelToken?: CancelToken,
+    method?: string,
+    terminal: SmpzTerminalModelType
 };
 
 export type SmpzApiResponseFullfilmentType = {result?: SmpzGenericDataType, status?: string, requestTime: number};
@@ -32,20 +36,20 @@ export default class Api {
         this.request = requestHelper;
     }
 
-    get({url, data, params, headers, timeout, cancelToken}: SmpzApiRequestParamsType): AxiosInstance {
-        return this.request('get', {url, data, params, headers, timeout, cancelToken}, this.store);
+    get(params: SmpzApiRequestParamsType): AxiosInstance {
+        return this.request({...params, method: 'get', terminal: _.get(this.store.getState(), 'terminal')});
     }
 
-    post({url, data, params, headers, timeout, cancelToken}: SmpzApiRequestParamsType): AxiosInstance {
-        return this.request('post', {url, data, params, headers, timeout, cancelToken}, this.store);
+    post(params: SmpzApiRequestParamsType): AxiosInstance {
+        return this.request({...params, method: 'post', terminal: _.get(this.store.getState(), 'terminal')});
     }
 
-    delete({url, data, params, headers, timeout, cancelToken}: SmpzApiRequestParamsType): AxiosInstance {
-        return this.request('delete', {url, data, params, headers, timeout, cancelToken}, this.store);
+    delete(params: SmpzApiRequestParamsType): AxiosInstance {
+        return this.request({...params, method: 'delete', terminal: _.get(this.store.getState(), 'terminal')});
     }
 
-    put({url, data, params, headers, timeout, cancelToken}: SmpzApiRequestParamsType): AxiosInstance {
-        return this.request('put', {url, data, params, headers, timeout, cancelToken}, this.store);
+    put(params: SmpzApiRequestParamsType): AxiosInstance {
+        return this.request({...params, method: 'put', terminal: _.get(this.store.getState(), 'terminal')});
     }
 
     makeCancelToken(): CancelTokenSource {

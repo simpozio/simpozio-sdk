@@ -2,16 +2,19 @@
 
 import type {SmpzApiRequestParamsType, SmpzApiResponseFullfilmentType} from './index';
 import axios, {AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse} from 'axios/index';
-import {Store} from 'redux';
 import _ from 'lodash';
-
-export const requestHelper = (
-    method: string,
-    {url, data, params, headers: _headers, timeout, cancelToken}: SmpzApiRequestParamsType,
-    store: Store
-): AxiosInstance => {
+export const requestHelper = ({
+    url,
+    data,
+    params,
+    headers: _headers,
+    timeout,
+    cancelToken,
+    method,
+    terminal
+}: SmpzApiRequestParamsType): AxiosInstance => {
     const axiosInstance = axios.create();
-    const {baseUrl, authorization, xHttpMethodOverride} = _.get(store.getState(), 'terminal', {});
+    const {baseUrl, authorization, xHttpMethodOverride} = terminal || {};
 
     const headers = _.assign(
         {},
@@ -44,8 +47,36 @@ export const requestHelper = (
                 return Promise.reject({result, status});
             }
         },
-        (error: AxiosError): Promise<AxiosError> => {
-            return Promise.reject(error);
+        (err: AxiosError): Promise<AxiosError> => {
+            let config = err.config;
+            // If config does not exist or the retry option is not set, reject
+            if (!config || !config.retry) {
+                return Promise.reject(err);
+            }
+
+            // Set the variable for keeping track of the retry count
+            config.__retryCount = config.__retryCount || 0;
+
+            // Check if we've maxed out the total number of retries
+            if (config.__retryCount >= config.retry) {
+                // Reject with the error
+                return Promise.reject(err);
+            }
+
+            // Increase the retry count
+            config.__retryCount += 1;
+
+            // Create new promise to handle exponential backoff
+            let backoff = new Promise((resolve: Function) => {
+                setTimeout(function() {
+                    resolve();
+                }, config.retryDelay || 1);
+            });
+
+            // Return the promise in which recalls axios to retry the request
+            return backoff.then((): AxiosInstance => {
+                return axios(config);
+            });
         }
     );
 

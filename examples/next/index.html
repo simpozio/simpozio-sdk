@@ -18,7 +18,44 @@
                 screen: 'main'
             }
         });
-    }
+
+        const makeTrigger = (index, after) => ({
+            id: 't' + index,
+            priority: 1,
+            if: {
+                conditions: {
+                    after: 'i' + after
+                }
+            },
+            do: [
+                {
+                    interaction: 'i' + index
+                }
+            ]
+        });
+
+        const makeInteraction = (id, data) =>
+            _.assign(
+                {},
+                {
+                    id: id,
+                    type: 'event'
+                },
+                data
+            );
+
+
+        simpozio.Journey.addTriggers(_.times(10, i => makeTrigger(i, i - 1)));
+        simpozio.Journey.addExperiencies(_.times(2, i => makeInteraction('e' + i, {
+            sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j)))
+        })));
+
+        console.log(simpozio.Journey.trigger('t1'));
+
+        setTimeout(() => {
+
+        }, 1000)
+    };
 </script>
 </body>
 </html>

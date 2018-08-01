@@ -1,14 +1,14 @@
 // @flow
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import _ from 'lodash';
-import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from './const';
+import {ACTIVITIES_ADD, ACTIVITIES_REGISTER, ACTIVITIES_REMOVE} from './const';
 import {getTimestampFromTimeframe} from '../../simpozio/common/common.helpers';
 
 export type SmpzActivityModelType = {
     id?: string,
     type: string,
     gravity?: number,
-    actor: string,
+    actor?: string,
     status?: string,
     timeframe?: {
         planned?: {
@@ -31,7 +31,7 @@ export type SmpzActivityModelType = {
     experience?: string,
     interaction: string,
     trigger: string,
-    event: string,
+    event?: string,
     location?: string,
     touchpoint?: string,
     input?: string | number | boolean | Array<mixed>,
@@ -55,7 +55,8 @@ export default (
     action: SmpzReduxActionType
 ): SmpzActivityCollectionType => {
     switch (action.type) {
-        case ACTIVITIES_ADD: {
+        case ACTIVITIES_ADD:
+        case ACTIVITIES_REGISTER: {
             const newActivities = _.castArray(_.get(action, 'payload.activities', []));
             const newItems = _.assign({}, activities.items, _.keyBy(newActivities, 'id'));
 
@@ -71,7 +72,7 @@ export default (
             });
         }
         case ACTIVITIES_REMOVE: {
-            const newActivities = _.get(action, 'payload.activities', []);
+            const newActivities = _.castArray(_.get(action, 'payload.activities', []));
             const newItems = _.omit(activities.items, newActivities);
             const newOrder = _.difference(activities.order, newActivities);
 
@@ -81,6 +82,7 @@ export default (
                 items: newItems
             });
         }
+        case 'persist/REHYDRATE':
         default: {
             return activities;
         }

@@ -14,6 +14,5 @@ export default combineReducers({
     terminal,
     heartbeat,
     triggers,
-    next,
-    requests
+    next
 });

@@ -6,6 +6,6 @@ import type {SmpzTerminalModelType} from './_terminal/reducer';
 
 export default class SimpozioWeb extends Simpozio {
     constructor(configObj: SmpzTerminalModelType) {
-        super(configObj, Heartbeat);
+        super({config: configObj, heartbeat: Heartbeat});
     }
 }

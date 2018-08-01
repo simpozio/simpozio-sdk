@@ -2,7 +2,6 @@
 import _ from 'lodash';
 import {NEXT_INVALIDATE} from './const';
 import type {SmpzReduxActionType} from '../simpozio/common/common.types';
-
 export type SmpzNextModelType = {
     lastNext: number,
     lastInvalidate: number

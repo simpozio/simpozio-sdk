@@ -42,6 +42,7 @@ export default (
                 lastOffline: status === false ? moment().toISOString() : heartbeat.lastOffline
             });
         }
+        case 'persist/REHYDRATE':
         default: {
             return heartbeat;
         }
