@@ -39,7 +39,7 @@ export default class SimpozioClass {
     Itinerary: ItineraryConstructor;
 
     constructor({config: configObj, heartbeat: HeartbeatConstructor, storage}: SmpzConstructorType): SimpozioClass {
-        const {heartbeat} = _.get(configObj, 'data', {});
+        const heartbeat = _.get(configObj, 'heartbeat', {});
 
         if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
@@ -51,7 +51,7 @@ export default class SimpozioClass {
             this.Next = new NextConstructor({store});
             this.Heartbeat = new HeartbeatConstructor({
                 store,
-                initialData: _.get(configObj, 'heartbeat', {})
+                initialData: heartbeat
             });
 
             this.store.dispatch(terminalUpdateAction(configObj));

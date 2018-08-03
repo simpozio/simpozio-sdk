@@ -5,28 +5,41 @@ import {offline} from '@redux-offline/redux-offline';
 import {applyMiddleware, createStore, Store} from 'redux';
 import reducers from './reducers';
 import {composeWithDevTools} from 'redux-devtools-extension';
-import {persistReducer} from 'redux-persist';
+import {persistReducer, persistStore} from 'redux-persist';
 import offlineConfig from '@redux-offline/redux-offline/lib/defaults';
 import {requestHelper} from '../_api/requestHelper';
 import {AxiosInstance} from 'axios/index';
-import storage from 'redux-persist/lib/storage';
 
 import type {SmpzApiRequestParamsType} from '../_api';
 
 const effect = (effect: SmpzApiRequestParamsType): AxiosInstance => requestHelper(effect);
 
 //$FlowFixMe
-export function initStore(storage: Storage = storage): Store {
+export function initStore(storage: Storage): Store {
     const persistConfig = {
         key: 'primary',
-        storage: storage
+        storage,
+        blacklist: ['next', 'heartbeat']
     };
 
     const persistedReducer = persistReducer(persistConfig, reducers);
 
-    return createStore(
+    const store = createStore(
         persistedReducer,
         {},
-        composeWithDevTools(applyMiddleware(thunk), offline({...offlineConfig, effect}))
+        composeWithDevTools(
+            applyMiddleware(thunk),
+            offline({
+                ...offlineConfig,
+                effect,
+                persistOptions: {
+                    whitelist: ['offline']
+                }
+            })
+        )
     );
+
+    persistStore(store, null);
+
+    return store;
 }

@@ -1,6 +1,6 @@
 // @flow
 
-import type {SmpzApiRequestParamsType} from "../../_api";
+import type {SmpzApiRequestParamsType} from '../../_api';
 
 export type SmpzGenericDataType = {[key: string]: mixed};
 
@@ -17,6 +17,6 @@ export type SmpzReduxActionMetaType = {
 
 export type SmpzReduxActionType = {
     type: string,
-    payload: SmpzGenericDataType,
+    payload?: SmpzGenericDataType,
     meta?: SmpzReduxActionMetaType
 };

@@ -57,7 +57,6 @@ export default class Journey {
     }
 
     addTriggers(triggers: Array<SmpzTriggerType>): Array<SmpzTriggerType> {
-        console.log(this.store);
         this.store.dispatch(triggersAddAction(triggers));
         return _.get(this.store.getState(), 'triggers.items');
     }

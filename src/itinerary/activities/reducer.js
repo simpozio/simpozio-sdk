@@ -3,6 +3,7 @@ import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/comm
 import _ from 'lodash';
 import {ACTIVITIES_ADD, ACTIVITIES_REGISTER, ACTIVITIES_REMOVE} from './const';
 import {getTimestampFromTimeframe} from '../../simpozio/common/common.helpers';
+import {REHYDRATE} from 'redux-persist';
 
 export type SmpzActivityModelType = {
     id?: string,
@@ -60,13 +61,22 @@ export default (
             const newActivities = _.castArray(_.get(action, 'payload.activities', []));
             const newItems = _.assign({}, activities.items, _.keyBy(newActivities, 'id'));
 
+            if (
+                _.every(
+                    _.map(newActivities, 'id'),
+                    (id: string): boolean => !_.isEmpty(_.get(activities, ['items', id]))
+                )
+            ) {
+                return activities;
+            }
+
             const newOrder = _.chain(newItems)
                 .sortBy((item: SmpzActivityModelType): number => getTimestampFromTimeframe(item))
                 .map('id')
                 .valueOf();
 
             return _.assign({}, activities, {
-                lastUpdate: Date.now(),
+                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : Date.now(),
                 order: newOrder,
                 items: newItems
             });
@@ -77,12 +87,17 @@ export default (
             const newOrder = _.difference(activities.order, newActivities);
 
             return _.assign({}, activities, {
-                lastUpdate: Date.now(),
+                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : Date.now(),
                 order: newOrder,
                 items: newItems
             });
         }
-        case 'persist/REHYDRATE':
+        case REHYDRATE: {
+            return _.assign({}, activities, {
+                items: _.get(action, 'payload.activities.items', {}),
+                order: _.get(action, 'payload.activities.order', [])
+            });
+        }
         default: {
             return activities;
         }

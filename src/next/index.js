@@ -7,8 +7,9 @@ import {Store} from 'redux';
 import Logger from '../simpozio/logger';
 import Api from '../_api';
 import {getListenerKey} from '../simpozio/common/common.helpers';
-import {nextInvalidate} from './actions';
+import {nextDoInvalidate, nextDoNext} from './actions';
 import {NEXT_EVENT, NEXT_INVALIDATE_EVENT} from './const';
+import type {SmpzInteractionModelType} from '../journey/interactions/reducer';
 
 const eventEmitter = new EventEmitter();
 
@@ -22,9 +23,10 @@ export default class Next {
     api: Api;
     mapMiddleware: Function;
     reduceMiddleware: Function;
-    lastInvalidate: number;
+    lastDoInvalidate: number;
     lastActivityUpdate: number;
-    lastNext: number;
+    lastTriggerSuggetUpdate: number;
+    lastDoNext: number;
 
     constructor({store}: SmpzNextConstructorParamsType) {
         const state = store.getState();
@@ -33,43 +35,67 @@ export default class Next {
         this.store = store;
         this.logger = new Logger({store, name: this.name});
         this.api = new Api({store});
-        this.lastInvalidate = _.get(state, 'next.lastInvalidate');
+        this.lastDoInvalidate = _.get(state, 'next.lastDoInvalidate');
         this.lastActivityUpdate = _.get(state, 'activities.lastUpdate');
+        this.lastTriggerSuggetUpdate = _.get(state, 'triggers.suggest.lastUpdate');
 
         this.store.subscribe(this._handleStoreChange.bind(this));
     }
 
-    _handleStoreChange() {
-        const {lastInvalidate, lastNext} = _.get(this.store.getState(), 'next', {});
-        const {lastUpdate: lastActivityUpdate} = _.get(this.store.getState(), 'activities', {});
+    _checkNext() {
+        const {lastDoNext} = _.get(this.store.getState(), 'next', {});
+        if (this.lastDoNext !== lastDoNext) {
+            this.lastDoNext = lastDoNext;
 
-        if (this.lastInvalidate !== lastInvalidate) {
-            this.lastInvalidate = lastInvalidate;
-            eventEmitter.emit(NEXT_INVALIDATE_EVENT);
-        }
-
-        if (this.lastActivityUpdate !== lastActivityUpdate) {
-            this.invalidate();
-        }
-
-        if (this.lastNext !== lastNext) {
-            this.lastNext = lastNext;
-            const state = this.store.getState();
-
-            const suggestItem = _.last(_.get(state, 'triggers.suggest.items', []));
-            const trigger = _.get(state, ['triggers.items', _.get(suggestItem, 'triggerId')]);
-            const interaction = _.get(state, ['interactions.items', _.get(trigger, 'interaction')]);
+            const suggestItem = _.last(_.get(this.store.getState(), 'triggers.suggest.items', []));
+            const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
+            const interactions = _.map(
+                _.get(trigger, 'do'),
+                ({interaction: interactionId}: {interaction: string}): SmpzInteractionModelType =>
+                    _.get(this.store.getState(), ['interactions', 'items', interactionId])
+            );
 
             eventEmitter.emit(NEXT_EVENT, {
                 trigger,
-                interaction
+                interactions
             });
+        }
+    }
+
+    _checkInvalide() {
+        const lastActivityUpdate = _.get(this.store.getState(), 'activities.lastUpdate', {});
+        if (this.lastActivityUpdate !== lastActivityUpdate) {
+            this.lastActivityUpdate = lastActivityUpdate;
+            this.invalidate();
+        }
+    }
+
+    _doInvalide() {
+        const {lastDoInvalidate} = _.get(this.store.getState(), 'next', {});
+        if (this.lastDoInvalidate !== lastDoInvalidate) {
+            this.lastDoInvalidate = lastDoInvalidate;
+            eventEmitter.emit(NEXT_INVALIDATE_EVENT);
+        }
+    }
+
+    _handleStoreChange() {
+        this._checkInvalide();
+        this._checkNext();
+        this._doNext();
+        this._doInvalide();
+    }
+
+    _doNext() {
+        const lastTriggerSuggetUpdate = _.get(this.store.getState(), 'triggers.suggest.lastUpdate', {});
+        if (this.lastTriggerSuggetUpdate !== lastTriggerSuggetUpdate) {
+            this.lastTriggerSuggetUpdate = lastTriggerSuggetUpdate;
+            this.store.dispatch(nextDoNext());
         }
     }
 
     invalidate() {
         this.store.dispatch(
-            nextInvalidate({
+            nextDoInvalidate({
                 mapMiddleware: this.mapMiddleware,
                 reduceMiddleware: this.reduceMiddleware
             })

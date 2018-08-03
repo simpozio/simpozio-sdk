@@ -2,7 +2,8 @@
 import _ from 'lodash';
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from './const';
-import {NEXT_INVALIDATE} from '../../next/const';
+import {NEXT_DO_INVALIDATE} from '../../next/const';
+import {REHYDRATE} from 'redux-persist';
 
 export type SmpzTriggerType = {
     id: string,
@@ -61,7 +62,7 @@ export default (
                 items: newItems
             });
         }
-        case NEXT_INVALIDATE: {
+        case NEXT_DO_INVALIDATE: {
             const interactionsDone = _.get(action, 'payload.interactions.done', {});
             const activities = _.get(action, 'payload.activities.items', {});
 
@@ -84,11 +85,16 @@ export default (
                 })
                 .compact()
                 .sort((trigger: SmpzTriggerSuggestType): number => trigger.rank)
+                .takeRight(5)
                 .valueOf();
+
+            const ifSuggerstUpdate =
+                !_.isEmpty(suggest) &&
+                !_.isEqual(_.map(_.get(triggers, 'suggest.items', []), 'triggerId'), _.map(suggest, 'triggerId'));
 
             return _.assign({}, triggers, {
                 suggest: {
-                    lastUpdate: Date.now(),
+                    lastUpdate: ifSuggerstUpdate ? Date.now() : _.get(triggers, 'suggest.lastUpdate', Date.now()),
                     items: suggest
                 }
             });

@@ -34,7 +34,13 @@ export default (
 ): SmpzHeartbeatModelType => {
     switch (action.type) {
         case HEARTBEAT_UPDATE: {
-            return _.assign({}, heartbeat, _.get(action, 'payload.data'));
+            let data = _.get(action, 'payload.data');
+            if (data === false) {
+                data = _.assign({}, heartbeat, {
+                    next: 0
+                });
+            }
+            return _.assign({}, heartbeat, data);
         }
         case TERMINAL_ONLINE_UPDATE: {
             const status = _.get(action, 'payload.status');
@@ -42,7 +48,6 @@ export default (
                 lastOffline: status === false ? moment().toISOString() : heartbeat.lastOffline
             });
         }
-        case 'persist/REHYDRATE':
         default: {
             return heartbeat;
         }

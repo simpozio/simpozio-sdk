@@ -79,7 +79,7 @@ export default class Heartbeat {
     _handleStoreChange() {
         const {authorization} = _.get(this.store.getState(), 'terminal', {});
         let newData = _.get(this.store.getState(), 'heartbeat', {});
-        newData.authorization = authorization;
+        newData = _.assign({}, newData, {authorization});
 
         if (_.isEqual(this.currentData, newData)) {
             return;
@@ -105,6 +105,7 @@ export default class Heartbeat {
             delete this.checkConnectionTimeout;
             const {authorization, online, debug} = _.get(this.store.getState(), 'terminal', {});
             const {next, lastOffline} = _.get(this.store.getState(), 'heartbeat', {});
+            const terminal = _.get(this.store.getState(), 'terminal', {});
 
             if (!authorization) {
                 this._isStarted = false;
@@ -157,14 +158,15 @@ export default class Heartbeat {
                 timestamp: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ')
             });
 
-            this.cancelToken = this.api.makeCancelToken().token;
+            this.cancelToken = this.api.makeCancelToken();
 
             this.api
                 .post({
                     data,
                     timeout: next * 0.5,
                     url: API_SIGNALS + API_HEARTBEAT,
-                    cancelToken: this.cancelToken
+                    cancelToken: this.cancelToken.token,
+                    terminal
                 })
                 .then(handleResponse)
                 .catch(handleReject);

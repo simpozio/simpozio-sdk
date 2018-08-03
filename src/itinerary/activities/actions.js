@@ -1,6 +1,7 @@
 // @flow
 
 import _ from 'lodash';
+import uuidv4 from 'uuid/v4';
 import {ACTIVITIES_ADD, ACTIVITIES_REMOVE, ACTIVITIES_REGISTER} from './const';
 import type {SmpzActivityModelType} from './reducer';
 import type {SmpzReduxActionType} from '../../simpozio/common/common.types';
@@ -22,24 +23,28 @@ export const activivitesRemoveAction = (data?: string | Array<string>): SmpzRedu
 });
 
 export const activitiesRegisterAction = (data?: SmpzActivityModelType | Array<SmpzActivityModelType>): Function => {
+    const activity = _.assign({}, data, {
+        id: uuidv4()
+    });
+
     return (dispatch: Function, getState: Function) => {
         dispatch({
             type: ACTIVITIES_REGISTER,
             payload: {
-                activities: data
+                activities: activity
             },
             meta: {
                 offline: {
                     effect: {
                         url: '/self/activities',
                         method: 'post',
-                        body: JSON.stringify(data),
+                        data: activity,
                         terminal: _.get(getState(), 'terminal')
                     },
                     rollback: {
                         type: ACTIVITIES_REMOVE,
-                        payload: {
-                            activities: data
+                        meta: {
+                            activities: activity.id
                         }
                     }
                 }

@@ -2,7 +2,7 @@
 
 import _ from 'lodash';
 import {Dispatch, Store} from 'redux';
-import {NEXT_INVALIDATE} from './const';
+import {NEXT_DO_INVALIDATE, NEXT_DO_NEXT} from './const';
 import {TRIGGERS_ADD} from '../journey/triggers/const';
 
 import type {SmpzTriggerCollectionType, SmpzTriggerType} from '../journey/triggers/reducer';
@@ -10,6 +10,7 @@ import type {SmpzInteractionsCollectionType} from '../journey/interactions/reduc
 import type {SmpzActivityCollectionType} from '../itinerary/activities/reducer';
 import type {SmpzExperiencesCollectionType} from '../journey/experiences/reducer';
 import type {SmpzTerminalModelType} from '../_terminal/reducer';
+import type {SmpzReduxActionType} from "../simpozio/common/common.types";
 
 export type SmpzContextType = {
     interactions: SmpzInteractionsCollectionType,
@@ -27,7 +28,11 @@ const makeContext = (state: Store = {}): SmpzContextType => ({
     terminal: state.terminal
 });
 
-export const nextInvalidate = (
+export const nextDoNext = (): SmpzReduxActionType => ({
+    type: NEXT_DO_NEXT
+});
+
+export const nextDoInvalidate = (
     params?: {
         mapMiddleware?: Function,
         reduceMiddleware?: Function
@@ -37,7 +42,7 @@ export const nextInvalidate = (
     return (dispatch: Dispatch, getState: () => Store): Promise<mixed> => {
         const invalidate = (): Promise<void> => {
             return dispatch({
-                type: NEXT_INVALIDATE,
+                type: NEXT_DO_INVALIDATE,
                 payload: makeContext(getState())
             });
         };

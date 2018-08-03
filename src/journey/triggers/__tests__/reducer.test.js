@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import reducer from '../reducer.js';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from '../const';
-import {NEXT_INVALIDATE} from '../../../next/const';
+import {NEXT_DO_INVALIDATE} from '../../../next/const';
 import {EXPERIENCES_ADD} from '../../experiences/const';
 
 jest.unmock('moment');
@@ -154,7 +154,7 @@ describe('Triggers', () => {
         expect(_.get(result3, 'items.t1')).toBeUndefined();
     });
 
-    test(`${NEXT_INVALIDATE} after`, () => {
+    test(`${NEXT_DO_INVALIDATE} after`, () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
@@ -163,7 +163,7 @@ describe('Triggers', () => {
         });
 
         const result2 = reducer(result1, {
-            type: NEXT_INVALIDATE,
+            type: NEXT_DO_INVALIDATE,
             payload: {
                 interactions: {
                     done: {

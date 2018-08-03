@@ -6,7 +6,7 @@ import {getTimestampFromTimeframe, interactionLinking} from '../../simpozio/comm
 import {INTERACTIONS_ADD, INTERACTIONS_REMOVE} from './const';
 import {EXPERIENCES_ADD, EXPERIENCES_REMOVE} from '../experiences/const';
 import type {SmpzExperiencesModelType} from '../experiences/reducer';
-import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from '../../itinerary/activities/const';
+import {ACTIVITIES_ADD, ACTIVITIES_REGISTER, ACTIVITIES_REMOVE} from '../../itinerary/activities/const';
 import type {SmpzActivityModelType} from '../../itinerary/activities/reducer';
 
 export type SmpzInteractionModelType =
@@ -195,6 +195,7 @@ export default (
                 items: newItems
             });
         }
+        case ACTIVITIES_REGISTER:
         case ACTIVITIES_ADD: {
             const newActivities = _.castArray(_.get(action, 'payload.activities', []));
 
