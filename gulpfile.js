@@ -4,7 +4,7 @@ const shell = require('gulp-shell');
 gulp.task('default', function() {
     gulp
         .src('package.json', {read: false})
-        .pipe(shell(['npx babel src -q --out-dir dist; npx webpack;'], {quiet: true}));
+        .pipe(shell(["npx babel src -q --out-dir dist --ignore '**/*.test.js'; npx webpack;"], {quiet: true}));
 });
 
 gulp.task('watch', function() {

@@ -1,9 +1,9 @@
 // @flow
 import _ from 'lodash';
+import moment from 'moment';
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from './const';
 import {NEXT_DO_INVALIDATE} from '../../next/const';
-import {REHYDRATE} from 'redux-persist';
 
 export type SmpzTriggerType = {
     id: string,
@@ -49,7 +49,7 @@ export default (
             const newItems = _.assign({}, triggers.items, _.keyBy(newTriggers, 'id'));
 
             return _.assign({}, triggers, {
-                lastUpdate: Date.now(),
+                lastUpdate: moment().toISOString(),
                 items: newItems
             });
         }
@@ -58,7 +58,7 @@ export default (
             const newItems = _.omit(triggers.items, newTriggers);
 
             return _.assign({}, triggers, {
-                lastUpdate: Date.now(),
+                lastUpdate: moment().toISOString(),
                 items: newItems
             });
         }
@@ -75,17 +75,23 @@ export default (
 
                     if (_.isString(after) && timestamp) {
                         // TODO: make right normalization
-                        return {triggerId: trigger.id, rank: 1 - (Date.now() - timestamp) / 10000000000};
+                        return {
+                            triggerId: trigger.id,
+                            rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
+                        };
                     } else if (_.isObject(after) && timestamp) {
                         const {interaction, choice} = after;
                         if (choice === input && activityInteraction === interaction) {
-                            return {triggerId: trigger.id, rank: 1 - (Date.now() - timestamp) / 10000000000};
+                            return {
+                                triggerId: trigger.id,
+                                rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
+                            };
                         }
                     }
                 })
                 .compact()
                 .sort((trigger: SmpzTriggerSuggestType): number => trigger.rank)
-                .takeRight(5)
+                .take(5)
                 .valueOf();
 
             const ifSuggerstUpdate =
@@ -94,7 +100,9 @@ export default (
 
             return _.assign({}, triggers, {
                 suggest: {
-                    lastUpdate: ifSuggerstUpdate ? Date.now() : _.get(triggers, 'suggest.lastUpdate', Date.now()),
+                    lastUpdate: ifSuggerstUpdate
+                        ? moment().toISOString()
+                        : _.get(triggers, 'suggest.lastUpdate', moment().toISOString()),
                     items: suggest
                 }
             });

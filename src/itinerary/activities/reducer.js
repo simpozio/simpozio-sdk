@@ -1,6 +1,7 @@
 // @flow
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import _ from 'lodash';
+import moment from 'moment';
 import {ACTIVITIES_ADD, ACTIVITIES_REGISTER, ACTIVITIES_REMOVE} from './const';
 import {getTimestampFromTimeframe} from '../../simpozio/common/common.helpers';
 import {REHYDRATE} from 'redux-persist';
@@ -76,7 +77,7 @@ export default (
                 .valueOf();
 
             return _.assign({}, activities, {
-                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : Date.now(),
+                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : moment().toISOString(),
                 order: newOrder,
                 items: newItems
             });
@@ -87,7 +88,7 @@ export default (
             const newOrder = _.difference(activities.order, newActivities);
 
             return _.assign({}, activities, {
-                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : Date.now(),
+                lastUpdate: _.isEmpty(newActivities) ? activities.lastUpdate : moment().toISOString(),
                 order: newOrder,
                 items: newItems
             });

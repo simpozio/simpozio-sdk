@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 import reducer from '../reducer.js';
 import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from '../const';
 
@@ -51,7 +52,7 @@ describe('Activities', () => {
             }
         });
 
-        expect(_.get(result1, 'lastUpdate')).toBeGreaterThan(0);
+        expect(moment(_.get(result1, 'lastUpdate')).valueOf()).toBeGreaterThan(0);
     });
 
     test(`${ACTIVITIES_ADD} Array`, () => {
@@ -113,7 +114,7 @@ describe('Activities', () => {
             }
         });
 
-        expect(_.get(result1, 'lastUpdate')).toBeGreaterThan(0);
+        expect(moment(_.get(result1, 'lastUpdate')).valueOf()).toBeGreaterThan(0);
     });
 
     test(`${ACTIVITIES_REMOVE} Array`, () => {

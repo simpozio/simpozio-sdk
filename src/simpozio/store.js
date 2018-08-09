@@ -15,17 +15,20 @@ import type {SmpzApiRequestParamsType} from '../_api';
 const effect = (effect: SmpzApiRequestParamsType): AxiosInstance => requestHelper(effect);
 
 //$FlowFixMe
-export function initStore(storage: Storage): Store {
+export function initStore(storage?: Storage): Store {
+    let persistedReducer;
     const persistConfig = {
         key: 'primary',
         storage,
         blacklist: ['next', 'heartbeat']
     };
 
-    const persistedReducer = persistReducer(persistConfig, reducers);
+    if (storage) {
+        persistedReducer = persistReducer(persistConfig, reducers);
+    }
 
     const store = createStore(
-        persistedReducer,
+        storage ? persistedReducer : reducers,
         {},
         composeWithDevTools(
             applyMiddleware(thunk),
@@ -39,7 +42,9 @@ export function initStore(storage: Storage): Store {
         )
     );
 
-    persistStore(store, null);
+    if (storage) {
+        persistStore(store, null);
+    }
 
     return store;
 }

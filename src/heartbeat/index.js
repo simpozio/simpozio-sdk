@@ -222,4 +222,8 @@ export default class Heartbeat {
     isStarted(): boolean {
         return this._isStarted;
     }
+
+    destroy() {
+        eventEmitter.removeAllListeners();
+    }
 }

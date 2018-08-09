@@ -1,6 +1,6 @@
 {
     "name": "simpozio-sdk",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "scripts": {
         "postinstall": "npx gulp",
         "dev": "npx gulp; npx gulp watch",

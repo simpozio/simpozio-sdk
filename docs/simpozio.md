@@ -40,6 +40,9 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
 
 ```false``` to avoid heartbeat
 
+#### config.persist
+**{boolean}** Persist data on client (default ```true```)
+
 #### config.debug
 **{boolean}** Debug mode
 

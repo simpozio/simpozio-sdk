@@ -69,7 +69,7 @@ const makeComplexExperience = () =>
         }
     });
 
-describe('Triggers', () => {
+describe('Reducer Triggers', () => {
     test('Initial State', () => {
         const result = reducer(undefined, {type: 'INIT'});
         expect(_.get(result, 'items')).toBeDefined();

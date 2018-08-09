@@ -28,4 +28,6 @@ export default class Itinerary {
         this.store.dispatch(activitiesAddAction(activities));
         return _.get(this.store.getState(), 'activities.items');
     }
+
+    destroy() {}
 }

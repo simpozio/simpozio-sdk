@@ -47,7 +47,7 @@ export default class Next {
         if (this.lastDoNext !== lastDoNext) {
             this.lastDoNext = lastDoNext;
 
-            const suggestItem = _.last(_.get(this.store.getState(), 'triggers.suggest.items', []));
+            const suggestItem = _.head(_.get(this.store.getState(), 'triggers.suggest.items', []));
             const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
             const interactions = _.map(
                 _.get(trigger, 'do'),
@@ -62,7 +62,7 @@ export default class Next {
         }
     }
 
-    _checkInvalide() {
+    _checkInvalidate() {
         const lastActivityUpdate = _.get(this.store.getState(), 'activities.lastUpdate', {});
         if (this.lastActivityUpdate !== lastActivityUpdate) {
             this.lastActivityUpdate = lastActivityUpdate;
@@ -72,14 +72,15 @@ export default class Next {
 
     _doInvalide() {
         const {lastDoInvalidate} = _.get(this.store.getState(), 'next', {});
+
         if (this.lastDoInvalidate !== lastDoInvalidate) {
             this.lastDoInvalidate = lastDoInvalidate;
-            eventEmitter.emit(NEXT_INVALIDATE_EVENT);
+            eventEmitter.emit(NEXT_INVALIDATE_EVENT, {});
         }
     }
 
     _handleStoreChange() {
-        this._checkInvalide();
+        this._checkInvalidate();
         this._checkNext();
         this._doNext();
         this._doInvalide();
@@ -138,5 +139,9 @@ export default class Next {
         eventEmitter.removeListener(event, cd);
 
         listeners[key] = null;
+    }
+
+    destroy() {
+        eventEmitter.removeAllListeners();
     }
 }

@@ -20,7 +20,7 @@ export type SmpzParamsType = SmpzTerminalModelType & {
     heartbeat: SmpzHeartbeatModelType
 };
 
-export type SmpzConstructorType = {config?: SmpzTerminalModelType, heartbeat: Class<Heartbeat>, storage?: Storage};
+export type SmpzConstructorType = { config?: SmpzTerminalModelType, heartbeat: Class<Heartbeat>, storage?: Storage };
 
 let SimpozioClassInstance: SimpozioClass | null = null;
 
@@ -40,10 +40,11 @@ export default class SimpozioClass {
 
     constructor({config: configObj, heartbeat: HeartbeatConstructor, storage}: SmpzConstructorType): SimpozioClass {
         const heartbeat = _.get(configObj, 'heartbeat', {});
+        const persist = _.get(configObj, 'persist', true);
 
         if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
-            const store = initStore(storage);
+            const store = initStore(persist && storage);
             this.store = store;
 
             this.Journey = new JourneyConstructor({store});
@@ -77,5 +78,13 @@ export default class SimpozioClass {
         if (SimpozioClassInstance && heartbeat) {
             this.Heartbeat.update(heartbeat);
         }
+    }
+
+    destroy() {
+        this.Journey.destroy();
+        this.Itinerary.destroy();
+        this.Next.destroy();
+        this.Heartbeat.destroy();
+        SimpozioClassInstance = null;
     }
 }

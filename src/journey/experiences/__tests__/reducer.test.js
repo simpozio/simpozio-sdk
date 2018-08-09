@@ -1,6 +1,8 @@
 import _ from 'lodash';
+import moment from 'moment';
 import reducer from '../reducer.js';
 import {EXPERIENCES_ADD, EXPERIENCES_REMOVE} from '../const';
+import {ACTIVITIES_REGISTER} from '../../../itinerary/activities/const';
 
 jest.unmock('moment');
 
@@ -14,7 +16,20 @@ const makeInteraction = (id, data) =>
         data
     );
 
-describe('Experiences', () => {
+const makeActivity = (index, timestamp) => ({
+    id: 'a' + index,
+    actor: index,
+    interaction: 'i' + index,
+    trigger: 't' + index,
+    event: 'ev' + index,
+    timeframe: {
+        actual: {
+            start: timestamp
+        }
+    }
+});
+
+describe('Reducer Experiences', () => {
     test('Initial State', () => {
         const result = reducer(undefined, {type: 'INIT'});
         expect(_.get(result, 'items')).toBeDefined();
@@ -111,5 +126,24 @@ describe('Experiences', () => {
 
         expect(_.get(result1, 'items.e1.id')).toBe('e1');
         expect(_.get(result1, 'items.e1.sequence')).toEqual(['e2', 'e3']);
+    });
+
+    test(`Done`, () => {
+        const result1 = reducer(undefined, {
+            type: EXPERIENCES_ADD,
+            payload: {
+                experiences: makeInteraction('e1', {
+                    sequence: [makeInteraction('i2'), makeInteraction('i3')]
+                })
+            }
+        });
+
+        const result2 = reducer(result1, {
+            type: ACTIVITIES_REGISTER,
+            payload: {
+                activities: [makeActivity(2, moment().toISOString()), makeActivity(3, moment().toISOString())]
+            }
+        });
+        expect(_.get(result2, 'done.[0]')).toBe('e1');
     });
 });

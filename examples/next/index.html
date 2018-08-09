@@ -11,6 +11,7 @@
     window.onload = () => {
         simpozio = new SimpozioClass({
             debug: true,
+            persist: false,
             heartbeat: false,
             authorization:
                 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MzMyMjcxMjEsImV4cGlyZXMiOjE1NTkxNDcxMjF9.dqiVFtEx7jO0iEg6GGsLEQqjy5378zq2-PaByu8s9lw'
@@ -59,6 +60,10 @@
             }, 10000);
         });
 
+        simpozio.Next.onInvalidate(() => {
+            console.log('!');
+        });
+
         setTimeout(() => {
             simpozio.Journey.do({
                 type: 'test',
@@ -67,10 +72,17 @@
                 trigger: 't1',
                 input: 1
             });
-            simpozio.Next.invalidate();
-            simpozio.Next.invalidate();
-            simpozio.Next.invalidate();
         }, 1000);
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i2',
+                trigger: 't2',
+                input: 1
+            });
+        }, 2000);
     };
 </script>
 </body>

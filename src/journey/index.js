@@ -14,7 +14,7 @@ import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzActivityModelType} from '../itinerary/activities/reducer';
 import {activitiesRegisterAction} from '../itinerary/activities/actions';
 
-export type SmpzNextConstructorParamsType = {store: Store};
+export type SmpzNextConstructorParamsType = { store: Store };
 
 export type SmpzTriggerDoType = {
     interaction: string | SmpzInteractionModelType,
@@ -65,4 +65,6 @@ export default class Journey {
         this.store.dispatch(experiencesAddAction(experiences));
         return _.get(this.store.getState(), 'experiences.items');
     }
+
+    destroy() {}
 }
