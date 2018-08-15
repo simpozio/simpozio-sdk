@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import moment from 'moment';
 import SimpozioClass from '../../../src/index';
+
 let simpozio;
 
 jest.disableAutomock();
@@ -80,6 +81,34 @@ describe('Next', () => {
             trigger: 't2',
             input: 1
         });
+    });
+
+    test('skippable', done => {
+        const nextCallbackSpy = jest.fn(() => {
+            expect(nextCallbackSpy.mock.calls.length).toBe(1);
+            done();
+        });
+
+        simpozio.Next.onNext(nextCallbackSpy);
+        setTimeout(() => {
+            simpozio.Journey.do({
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i1',
+                trigger: 't1',
+                input: 1
+            });
+        }, 1000);
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i3',
+                trigger: 't3',
+                input: 1
+            });
+        }, 2000);
     });
 
     afterEach(() => {

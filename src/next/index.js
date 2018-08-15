@@ -7,9 +7,10 @@ import {Store} from 'redux';
 import Logger from '../simpozio/logger';
 import Api from '../_api';
 import {getListenerKey} from '../simpozio/common/common.helpers';
-import {nextDoInvalidate, nextDoNext} from './actions';
+import {nextDoInvalidate, nextDoNext, nextSetWaitFor} from './actions';
 import {NEXT_EVENT, NEXT_INVALIDATE_EVENT} from './const';
 import type {SmpzInteractionModelType} from '../journey/interactions/reducer';
+import type {SmpzTriggerType} from '../journey/triggers/reducer';
 
 const eventEmitter = new EventEmitter();
 
@@ -42,23 +43,30 @@ export default class Next {
         this.store.subscribe(this._handleStoreChange.bind(this));
     }
 
+    _getNext(): {
+        trigger: SmpzTriggerType,
+        interactions: Array<SmpzInteractionModelType>
+    } {
+        const suggestItem = _.head(_.get(this.store.getState(), 'triggers.suggest.items', []));
+        const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
+        const interactions = _.map(
+            _.get(trigger, 'do'),
+            ({interaction: interactionId}: {interaction: string}): SmpzInteractionModelType =>
+                _.get(this.store.getState(), ['interactions', 'items', interactionId])
+        );
+
+        return {
+            trigger,
+            interactions
+        };
+    }
+
     _checkNext() {
         const {lastDoNext} = _.get(this.store.getState(), 'next', {});
         if (this.lastDoNext !== lastDoNext) {
             this.lastDoNext = lastDoNext;
 
-            const suggestItem = _.head(_.get(this.store.getState(), 'triggers.suggest.items', []));
-            const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
-            const interactions = _.map(
-                _.get(trigger, 'do'),
-                ({interaction: interactionId}: {interaction: string}): SmpzInteractionModelType =>
-                    _.get(this.store.getState(), ['interactions', 'items', interactionId])
-            );
-
-            eventEmitter.emit(NEXT_EVENT, {
-                trigger,
-                interactions
-            });
+            eventEmitter.emit(NEXT_EVENT, this._getNext());
         }
     }
 
@@ -90,8 +98,35 @@ export default class Next {
         const lastTriggerSuggetUpdate = _.get(this.store.getState(), 'triggers.suggest.lastUpdate', {});
         if (this.lastTriggerSuggetUpdate !== lastTriggerSuggetUpdate) {
             this.lastTriggerSuggetUpdate = lastTriggerSuggetUpdate;
-            this.store.dispatch(nextDoNext());
+
+            if (this._checkSkippable()) {
+                this.store.dispatch(nextDoNext());
+            }
         }
+    }
+
+    _checkSkippable(): boolean {
+        const {interactions} = this._getNext();
+        const done = _.keys(_.get(this.store.getState(), 'interactions.done'));
+        const notSkippable = _.filter(
+            interactions,
+            (i: SmpzInteractionModelType): boolean =>
+                _.get(i, 'skippable') === false && !_.includes(done, _.get(i, 'id'))
+        );
+
+        if (!_.isEmpty(notSkippable)) {
+            this.store.dispatch(nextSetWaitFor(notSkippable));
+        }
+
+        const waitFor = _.get(this.store.getState(), 'next.waitFor');
+
+        console.log(interactions, done, waitFor);
+
+        if (!_.isEmpty(waitFor)) {
+            this.logger.log('Next skipped. Wait for ', waitFor);
+        }
+
+        return _.isEmpty(waitFor);
     }
 
     invalidate() {

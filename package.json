@@ -25,22 +25,25 @@
         "lodash": "^4.17.5",
         "moment": "^2.22.2",
         "raven-js": "^3.26.3",
-        "react-native": "^0.56.0",
-        "react-native-simpozio-background-worker":
-            "git@github.com:smekalka/react-native-simpozio-background-worker.git",
+        "react-native": "0.55.4",
+        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git",
         "redux": "^4.0.0",
         "redux-devtools-extension": "^2.13.5",
         "redux-persist": "^5.10.0",
         "redux-thunk": "^2.3.0",
-        "reselect": "^3.0.1",
         "uuid": "^3.3.2",
         "webpack": "^4.14.0",
         "webpack-cli": "^3.0.8"
     },
     "main": "./dist",
     "babel": {
-        "plugins": ["transform-object-rest-spread"],
-        "presets": ["env", "flow"]
+        "plugins": [
+            "transform-object-rest-spread"
+        ],
+        "presets": [
+            "env",
+            "flow"
+        ]
     },
     "devDependencies": {
         "eslint-plugin-flowtype": "^2.49.3"

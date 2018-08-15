@@ -2,15 +2,15 @@
 
 import _ from 'lodash';
 import {Dispatch, Store} from 'redux';
-import {NEXT_DO_INVALIDATE, NEXT_DO_NEXT} from './const';
+import {NEXT_DO_INVALIDATE, NEXT_DO_NEXT, NEXT_SET_WAIT_FOR} from './const';
 import {TRIGGERS_ADD} from '../journey/triggers/const';
 
 import type {SmpzTriggerCollectionType, SmpzTriggerType} from '../journey/triggers/reducer';
-import type {SmpzInteractionsCollectionType} from '../journey/interactions/reducer';
+import type {SmpzInteractionModelType, SmpzInteractionsCollectionType} from '../journey/interactions/reducer';
 import type {SmpzActivityCollectionType} from '../itinerary/activities/reducer';
 import type {SmpzExperiencesCollectionType} from '../journey/experiences/reducer';
 import type {SmpzTerminalModelType} from '../_terminal/reducer';
-import type {SmpzReduxActionType} from "../simpozio/common/common.types";
+import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 
 export type SmpzContextType = {
     interactions: SmpzInteractionsCollectionType,
@@ -30,6 +30,13 @@ const makeContext = (state: Store = {}): SmpzContextType => ({
 
 export const nextDoNext = (): SmpzReduxActionType => ({
     type: NEXT_DO_NEXT
+});
+
+export const nextSetWaitFor = (interactions: Array<SmpzInteractionModelType>): SmpzReduxActionType => ({
+    type: NEXT_SET_WAIT_FOR,
+    payload: {
+        interactions
+    }
 });
 
 export const nextDoInvalidate = (

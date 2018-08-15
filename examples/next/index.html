@@ -45,23 +45,15 @@
 
         simpozio.Journey.addTriggers(_.times(10, i => makeTrigger(i, i - 1)));
         simpozio.Journey.addExperiencies(_.times(2, i => makeInteraction('e' + i, {
-            sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j)))
+            sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j), (i * 5 + j) === 2 ? {skippable: false} : {}))
         })));
 
         simpozio.Next.onNext(({trigger, interactions}) => {
-            setTimeout(() => {
-                simpozio.Journey.do({
-                    type: 'test',
-                    timestamp: moment().toISOString(),
-                    interaction: _.get(_.head(interactions), 'id'),
-                    trigger: _.get(trigger, 'id'),
-                    input: 1
-                });
-            }, 10000);
+            console.log('onNext', {trigger, interactions});
         });
 
         simpozio.Next.onInvalidate(() => {
-            console.log('!');
+            console.log('onInvalidate');
         });
 
         setTimeout(() => {
@@ -78,11 +70,31 @@
             simpozio.Journey.do({
                 type: 'test',
                 timestamp: moment().toISOString(),
+                interaction: 'i3',
+                trigger: 't3',
+                input: 1
+            });
+        }, 2000);
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                type: 'test',
+                timestamp: moment().toISOString(),
                 interaction: 'i2',
                 trigger: 't2',
                 input: 1
             });
-        }, 2000);
+        }, 3000);
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i3',
+                trigger: 't3',
+                input: 1
+            });
+        }, 4000);
     };
 </script>
 </body>
