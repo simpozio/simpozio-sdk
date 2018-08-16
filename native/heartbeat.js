@@ -2,9 +2,11 @@
 
 import _ from 'lodash';
 import SimpozioBackgroundWorker from 'react-native-simpozio-background-worker';
-import Heartbeat, {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
-import type {SmpzGenericDataType} from '../src/simpozio/common.types';
+import Heartbeat from '../src/heartbeat';
+import type {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
+import type {SmpzGenericDataType} from '../src/simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from '../src/heartbeat/reducer';
+import {getListenerKey} from "../src/simpozio/common/common.helpers";
 
 const listeners = {};
 
@@ -16,7 +18,7 @@ export type SmpzHeartbeatNativeModelType = {
         'Accept-Language': string,
         'X-HTTP-Method-Override': string
     },
-    body: SmpzHeartbeatModelType
+    body?: SmpzHeartbeatModelType
 };
 
 export default class HeartbeatNative extends Heartbeat {
@@ -25,14 +27,14 @@ export default class HeartbeatNative extends Heartbeat {
     }
 
     addListener(event: string, cb: () => mixed): string {
-        let key = this._getKey(cb);
+        let key = getListenerKey(cb);
 
         listeners[key] = SimpozioBackgroundWorker.addListener(event, cb);
 
         return key;
     }
 
-    _getMetadata(): SmpzHeartbeatNativeModelType {
+    _getNativeMetadata(): SmpzHeartbeatNativeModelType {
         const {baseUrl, authorization, touchpoint, userAgent, acceptLanguage, xHttpMethodOverride} = _.get(
             this.store.getState(),
             'terminal',
@@ -83,7 +85,7 @@ export default class HeartbeatNative extends Heartbeat {
                     }
                 });
         } else if (this._isStarted === false) {
-            SimpozioBackgroundWorker.startHeartbeat(this._getMetadata())
+            SimpozioBackgroundWorker.startHeartbeat(this._getNativeMetadata())
                 .then(() => {
                     this._isStarted = true;
                     if (debug) {

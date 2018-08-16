@@ -7,18 +7,18 @@ import {Store} from 'redux';
 import {CancelToken} from 'axios';
 
 import Logger from '../simpozio/logger';
-import Api from '../api';
-import type {SmpzApiResponseFullfilmentType} from '../api';
-import {terminalOnlineAction} from '../terminal/actions';
+import Api from '../_api';
+import type {SmpzApiResponseFullfilmentType} from '../_api';
+import {terminalOnlineAction} from '../_terminal/actions';
 import {heartbeatUpdateAction} from './actions';
 
 import {HEARTBEAT_RN_EVENT_EXCEPTION, HEARTBEAT_RN_EVENT_FAIL, HEARTBEAT_RN_EVENT_RESUME} from './const';
-import {API_HEARTBEAT, API_SIGNALS} from '../api/const';
-import type {SmpzGenericDataType} from '../simpozio/common.types';
+import {API_HEARTBEAT, API_SIGNALS} from '../_api/const';
+import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from './reducer';
 import {AxiosError} from 'axios/index';
+import {getListenerKey} from '../simpozio/common/common.helpers';
 
-const META = '_simpozioListenerId';
 const listeners = {};
 const eventEmitter = new EventEmitter();
 
@@ -51,26 +51,8 @@ export default class Heartbeat {
         this.store.dispatch(heartbeatUpdateAction(initialData));
     }
 
-    _getKey(listener: () => any): string {
-        if (!listener) {
-            return '';
-        }
-
-        if (!listener.hasOwnProperty(META)) {
-            if (!Object.isExtensible(listener)) {
-                return 'F';
-            }
-
-            Object.defineProperty(listener, META, {
-                value: _.uniqueId('SIMPOZIO_LISTENER_')
-            });
-        }
-
-        return listener[META];
-    }
-
     addListener(event: string, cb: () => mixed): string {
-        let key = this._getKey(cb);
+        let key = getListenerKey(cb);
 
         eventEmitter.addListener(event, cb);
         listeners[key] = {event, cb};
@@ -97,7 +79,7 @@ export default class Heartbeat {
     _handleStoreChange() {
         const {authorization} = _.get(this.store.getState(), 'terminal', {});
         let newData = _.get(this.store.getState(), 'heartbeat', {});
-        newData.authorization = authorization;
+        newData = _.assign({}, newData, {authorization});
 
         if (_.isEqual(this.currentData, newData)) {
             return;
@@ -123,6 +105,7 @@ export default class Heartbeat {
             delete this.checkConnectionTimeout;
             const {authorization, online, debug} = _.get(this.store.getState(), 'terminal', {});
             const {next, lastOffline} = _.get(this.store.getState(), 'heartbeat', {});
+            const terminal = _.get(this.store.getState(), 'terminal', {});
 
             if (!authorization) {
                 this._isStarted = false;
@@ -175,14 +158,15 @@ export default class Heartbeat {
                 timestamp: moment().format('YYYY-MM-DDTHH:mm:ss.SSSZZ')
             });
 
-            this.cancelToken = this.api.makeCancelToken().token;
+            this.cancelToken = this.api.makeCancelToken();
 
             this.api
                 .post({
                     data,
                     timeout: next * 0.5,
                     url: API_SIGNALS + API_HEARTBEAT,
-                    cancelToken: this.cancelToken
+                    cancelToken: this.cancelToken.token,
+                    terminal
                 })
                 .then(handleResponse)
                 .catch(handleReject);
@@ -237,5 +221,9 @@ export default class Heartbeat {
 
     isStarted(): boolean {
         return this._isStarted;
+    }
+
+    destroy() {
+        eventEmitter.removeAllListeners();
     }
 }

@@ -4,9 +4,8 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import {HEARTBEAT_DEFAULT_NEXT, HEARTBEAT_DEFAULT_STATE, HEARTBEAT_UPDATE} from './const';
-import {TERMINAL_ONLINE_UPDATE} from '../terminal/const';
-import type {SmpzReduxActionType} from '../simpozio/common.types';
-import type {SmpzTerminalModelType} from '../terminal/reducer';
+import {TERMINAL_ONLINE_UPDATE} from '../_terminal/const';
+import type {SmpzReduxActionType} from '../simpozio/common/common.types';
 
 export type SmpzHeartbeatModelType = {
     touchpoint?: string,
@@ -35,7 +34,13 @@ export default (
 ): SmpzHeartbeatModelType => {
     switch (action.type) {
         case HEARTBEAT_UPDATE: {
-            return _.assign({}, heartbeat, _.get(action, 'payload.data'));
+            let data = _.get(action, 'payload.data');
+            if (data === false) {
+                data = _.assign({}, heartbeat, {
+                    next: 0
+                });
+            }
+            return _.assign({}, heartbeat, data);
         }
         case TERMINAL_ONLINE_UPDATE: {
             const status = _.get(action, 'payload.status');
