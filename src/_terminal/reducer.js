@@ -3,15 +3,10 @@
 import _ from 'lodash';
 import ObjectID from 'bson-objectid';
 
-import {
-    TERMINAL_UPDATE,
-    TERMINAL_ACCESS_TOKEN_UPDATE,
-    TERMINAL_ID_UPDATE,
-    API_DEFAULT_URL,
-    TERMINAL_ONLINE_UPDATE
-} from './const';
+import {TERMINAL_UPDATE, TERMINAL_ACCESS_TOKEN_UPDATE, TERMINAL_ID_UPDATE, TERMINAL_ONLINE_UPDATE} from './const';
 
 import type {SmpzReduxActionType} from '../simpozio/common/common.types';
+import {API_DEFAULT_URL} from '../_api/const';
 
 export type SmpzTerminalModelType = {
     authorization?: string,
