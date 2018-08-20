@@ -6,7 +6,7 @@ import Heartbeat from '../src/heartbeat';
 import type {SmpzHeartbeatConstructorParamsType} from '../src/heartbeat';
 import type {SmpzGenericDataType} from '../src/simpozio/common/common.types';
 import type {SmpzHeartbeatModelType} from '../src/heartbeat/reducer';
-import {getListenerKey} from "../src/simpozio/common/common.helpers";
+import {getListenerKey} from '../src/simpozio/common/common.helpers';
 
 const listeners = {};
 
@@ -98,7 +98,7 @@ export default class HeartbeatNative extends Heartbeat {
                     }
                 });
         } else {
-            SimpozioBackgroundWorker.updateHeartbeat(this._getMetadata());
+            SimpozioBackgroundWorker.updateHeartbeat(this._getNativeMetadata());
         }
 
         this.currentData = newData;
