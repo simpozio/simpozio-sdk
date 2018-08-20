@@ -58,41 +58,49 @@
 
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i1',
-                trigger: 't1',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i1',
+                    trigger: 't1',
+                    input: 1
+                }
             });
         }, 1000);
 
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i3',
-                trigger: 't3',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i3',
+                    trigger: 't3',
+                    input: 1
+                }
             });
         }, 2000);
 
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i2',
-                trigger: 't2',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i2',
+                    trigger: 't2',
+                    input: 1
+                }
             });
         }, 3000);
 
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i3',
-                trigger: 't3',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i3',
+                    trigger: 't3',
+                    input: 1
+                }
             });
         }, 4000);
     };

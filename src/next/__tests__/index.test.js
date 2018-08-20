@@ -1,35 +1,11 @@
 import _ from 'lodash';
 import moment from 'moment';
 import SimpozioClass from '../../../src/index';
+import {makeInteraction, makeTrigger} from '../../../tools/test-helpers';
 
 let simpozio;
 
 jest.disableAutomock();
-
-const makeTrigger = (index, after) => ({
-    id: 't' + index,
-    priority: 1,
-    if: {
-        conditions: {
-            after: 'i' + after
-        }
-    },
-    do: [
-        {
-            interaction: 'i' + index
-        }
-    ]
-});
-
-const makeInteraction = (id, data) =>
-    _.assign(
-        {},
-        {
-            id: id,
-            type: 'event'
-        },
-        data
-    );
 
 describe('Next', () => {
     beforeEach(() => {
@@ -38,17 +14,22 @@ describe('Next', () => {
             heartbeat: false
         });
 
-        simpozio.Journey.addTriggers(_.times(10, i => makeTrigger(i, i - 1)));
-        simpozio.Journey.addExperiencies(
+        simpozio.Journey.addTriggers(
+            _.times(10, i => makeTrigger({id: 't' + i, interaction: 'i' + i, after: 'i' + (i - 1), on: 'signal' + i}))
+        );
+        simpozio.Journey.addExperiences(
             _.times(2, i =>
-                makeInteraction('e' + i, {
-                    sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j)))
+                makeInteraction({
+                    id: 'e' + i,
+                    data: {
+                        sequence: _.times(5, j => makeInteraction({id: 'i' + (i * 5 + j)}))
+                    }
                 })
             )
         );
     });
 
-    test('onNext', done => {
+    test('onNext do activity', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t2');
             expect(interactions[0].id).toBe('i2');
@@ -58,11 +39,27 @@ describe('Next', () => {
         simpozio.Next.onNext(nextCallbackSpy);
 
         simpozio.Journey.do({
-            type: 'test',
-            timestamp: moment().toISOString(),
-            interaction: 'i1',
-            trigger: 't1',
-            input: 1
+            activity: {
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i1',
+                trigger: 't1',
+                input: 1
+            }
+        });
+    });
+
+    test('onNext do signal', done => {
+        const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
+            expect(trigger.id).toBe('t1');
+            expect(interactions[0].id).toBe('i1');
+            done();
+        });
+
+        simpozio.Next.onNext(nextCallbackSpy);
+
+        simpozio.Journey.do({
+            signal: 'signal1'
         });
     });
 
@@ -75,11 +72,13 @@ describe('Next', () => {
         simpozio.Next.onInvalidate(invalidateCallbackSpy);
 
         simpozio.Journey.do({
-            type: 'test',
-            timestamp: moment().toISOString(),
-            interaction: 'i2',
-            trigger: 't2',
-            input: 1
+            activity: {
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i2',
+                trigger: 't2',
+                input: 1
+            }
         });
     });
 
@@ -92,21 +91,25 @@ describe('Next', () => {
         simpozio.Next.onNext(nextCallbackSpy);
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i1',
-                trigger: 't1',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i1',
+                    trigger: 't1',
+                    input: 1
+                }
             });
         }, 1000);
 
         setTimeout(() => {
             simpozio.Journey.do({
-                type: 'test',
-                timestamp: moment().toISOString(),
-                interaction: 'i3',
-                trigger: 't3',
-                input: 1
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i3',
+                    trigger: 't3',
+                    input: 1
+                }
             });
         }, 2000);
     });

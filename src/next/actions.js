@@ -42,15 +42,16 @@ export const nextSetWaitFor = (interactions: Array<SmpzInteractionModelType>): S
 export const nextDoInvalidate = (
     params?: {
         mapMiddleware?: Function,
-        reduceMiddleware?: Function
+        reduceMiddleware?: Function,
+        signal?: string
     } = {}
 ): Function => {
-    const {mapMiddleware, reduceMiddleware} = params;
+    const {mapMiddleware, reduceMiddleware, signal} = params;
     return (dispatch: Dispatch, getState: () => Store): Promise<mixed> => {
         const invalidate = (): Promise<void> => {
             return dispatch({
                 type: NEXT_DO_INVALIDATE,
-                payload: makeContext(getState())
+                payload: _.assign({}, makeContext(getState()), {signal})
             });
         };
 

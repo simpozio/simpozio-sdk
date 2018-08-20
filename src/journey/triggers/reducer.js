@@ -65,15 +65,22 @@ export default (
         case NEXT_DO_INVALIDATE: {
             const interactionsDone = _.get(action, 'payload.interactions.done', {});
             const activities = _.get(action, 'payload.activities.items', {});
+            const signal = _.get(action, 'payload.signal', '');
 
             const suggest = _.chain(triggers)
                 .get('items')
                 .map((trigger: SmpzTriggerType): SmpzTriggerSuggestType | void => {
                     const after = _.get(trigger, 'if.conditions.after', {});
+                    const on = _.get(trigger, 'if.conditions.on', []);
                     const {timestamp, activity: activityId} = _.get(interactionsDone, after, {});
                     const {input, interaction: activityInteraction} = _.get(activities, activityId, {});
 
-                    if (_.isString(after) && timestamp) {
+                    if (signal && !_.isEmpty(on) && _.includes(on, signal)) {
+                        return {
+                            triggerId: trigger.id,
+                            rank: 1
+                        };
+                    } else if (_.isString(after) && timestamp) {
                         // TODO: make right normalization
                         return {
                             triggerId: trigger.id,

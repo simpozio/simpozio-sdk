@@ -13,8 +13,9 @@ import type {SmpzInteractionModelType} from './interactions/reducer';
 import type {SmpzGenericDataType} from '../simpozio/common/common.types';
 import type {SmpzActivityModelType} from '../itinerary/activities/reducer';
 import {activitiesRegisterAction} from '../itinerary/activities/actions';
+import {nextDoInvalidate} from '../next/actions';
 
-export type SmpzNextConstructorParamsType = { store: Store };
+export type SmpzNextConstructorParamsType = {store: Store};
 
 export type SmpzTriggerDoType = {
     interaction: string | SmpzInteractionModelType,
@@ -47,13 +48,19 @@ export default class Journey {
         );
     }
 
-    do(activity: SmpzActivityModelType) {
+    do({activity, signal}: {activity?: SmpzActivityModelType, signal?: string}) {
         const state = this.store.getState();
         const {interaction: interactionId} = activity || {};
 
         const experience = _.get(state, ['interaction', interactionId, 'experienceId']);
         const {touchpoint} = _.get(state, ['terminal']);
-        this.store.dispatch(activitiesRegisterAction({...activity, experience, touchpoint}));
+        if (activity) {
+            this.store.dispatch(activitiesRegisterAction({...activity, experience, touchpoint}));
+        }
+
+        if (signal) {
+            this.store.dispatch(nextDoInvalidate({signal}));
+        }
     }
 
     addTriggers(triggers: Array<SmpzTriggerType>): Array<SmpzTriggerType> {
@@ -61,7 +68,7 @@ export default class Journey {
         return _.get(this.store.getState(), 'triggers.items');
     }
 
-    addExperiencies(experiences: Array<SmpzExperiencesModelType>): Array<SmpzExperiencesModelType> {
+    addExperiences(experiences: Array<SmpzExperiencesModelType>): Array<SmpzExperiencesModelType> {
         this.store.dispatch(experiencesAddAction(experiences));
         return _.get(this.store.getState(), 'experiences.items');
     }
