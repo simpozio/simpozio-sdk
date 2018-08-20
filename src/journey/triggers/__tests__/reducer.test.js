@@ -3,68 +3,43 @@ import reducer from '../reducer.js';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from '../const';
 import {NEXT_DO_INVALIDATE} from '../../../next/const';
 import {EXPERIENCES_ADD} from '../../experiences/const';
+import {makeInteraction, makeTrigger} from '../../../../tools/test-helpers';
 
 jest.unmock('moment');
-
-const makeTrigger = (id, after) => ({
-    id: id,
-    priority: 1,
-    if: {
-        conditions: {
-            after
-        }
-    },
-    do: [
-        {
-            interaction: 'i_' + id
-        }
-    ]
-});
-
-const makeActivity = (id, timestamp, interaction) => ({
-    id: id,
-    actor: 'actor',
-    interaction: interaction,
-    trigger: 'trigger',
-    event: 'event',
-    timeframe: {
-        actual: {
-            start: timestamp
-        }
-    }
-});
-
-const makeInteraction = (id, data) =>
-    _.assign(
-        {},
-        {
-            id: id,
-            type: 'event'
-        },
-        data
-    );
 
 const makeComplexExperience = () =>
     reducer(undefined, {
         type: EXPERIENCES_ADD,
         payload: {
             experiences: [
-                makeInteraction('e1', {
-                    sequence: [makeInteraction('e2'), makeInteraction('e3')]
-                }),
-                makeInteraction('e4', {
-                    sequence: [
-                        makeInteraction('e5', {
-                            variants: [
-                                makeInteraction('e7'),
-                                makeInteraction('e8', {
-                                    choice: [makeInteraction('e9'), makeInteraction('e10')]
-                                })
-                            ]
-                        }),
-                        makeInteraction('e6')
-                    ]
-                })
+                makeInteraction(
+                    {id: 'e1'},
+                    {
+                        sequence: [makeInteraction({id: 'e2'}), makeInteraction({id: 'e3'})]
+                    }
+                ),
+                makeInteraction(
+                    {id: 'e4'},
+                    {
+                        sequence: [
+                            makeInteraction(
+                                {id: 'e5'},
+                                {
+                                    variants: [
+                                        makeInteraction({id: 'e7'}),
+                                        makeInteraction(
+                                            {id: 'e8'},
+                                            {
+                                                choice: [makeInteraction({id: 'e9'}), makeInteraction({id: 'e10'})]
+                                            }
+                                        )
+                                    ]
+                                }
+                            ),
+                            makeInteraction({id: 'e6'})
+                        ]
+                    }
+                )
             ]
         }
     });
@@ -79,14 +54,14 @@ describe('Reducer Triggers', () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: makeTrigger('t1')
+                triggers: makeTrigger({id: 't1'})
             }
         });
 
         const result2 = reducer(result1, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: makeTrigger('t2')
+                triggers: makeTrigger({id: 't2'})
             }
         });
 
@@ -98,14 +73,14 @@ describe('Reducer Triggers', () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: makeTrigger('t1')
+                triggers: makeTrigger({id: 't1'})
             }
         });
 
         const result2 = reducer(result1, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: [makeTrigger('t2'), makeTrigger('t3')]
+                triggers: [makeTrigger({id: 't2'}), makeTrigger({id: 't3'})]
             }
         });
 
@@ -118,7 +93,7 @@ describe('Reducer Triggers', () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: [makeTrigger('t1'), makeTrigger('t2'), makeTrigger('t3')]
+                triggers: [makeTrigger({id: 't1'}), makeTrigger({id: 't2'}), makeTrigger({id: 't3'})]
             }
         });
 
@@ -138,7 +113,7 @@ describe('Reducer Triggers', () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: [makeTrigger('t1'), makeTrigger('t2'), makeTrigger('t3')]
+                triggers: [makeTrigger({id: 't1'}), makeTrigger({id: 't2'}), makeTrigger({id: 't3'})]
             }
         });
 
@@ -158,7 +133,11 @@ describe('Reducer Triggers', () => {
         const result1 = reducer(undefined, {
             type: TRIGGERS_ADD,
             payload: {
-                triggers: [makeTrigger('t1', 'e1'), makeTrigger('t2', 'e2'), makeTrigger('t3', 'e3')]
+                triggers: [
+                    makeTrigger({id: 't1', after: 'e1'}),
+                    makeTrigger({id: 't2', after: 'e2'}),
+                    makeTrigger({id: 't3', after: 'e3'})
+                ]
             }
         });
 
@@ -181,5 +160,27 @@ describe('Reducer Triggers', () => {
         });
 
         expect(_.map(result2.suggest.items, 'triggerId')).toEqual(['t2', 't1']);
+    });
+
+    test(`${NEXT_DO_INVALIDATE} signal`, () => {
+        const result1 = reducer(undefined, {
+            type: TRIGGERS_ADD,
+            payload: {
+                triggers: [
+                    makeTrigger({id: 't1', on: 'test1-signal'}),
+                    makeTrigger({id: 't2', on: 'test2-signal'}),
+                    makeTrigger({id: 't3', on: 'test3-signal'})
+                ]
+            }
+        });
+
+        const result2 = reducer(result1, {
+            type: NEXT_DO_INVALIDATE,
+            payload: {
+                signal: 'test2-signal'
+            }
+        });
+
+        expect(_.map(result2.suggest.items, 'triggerId')).toEqual(['t2']);
     });
 });

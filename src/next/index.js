@@ -120,8 +120,6 @@ export default class Next {
 
         const waitFor = _.get(this.store.getState(), 'next.waitFor');
 
-        console.log(interactions, done, waitFor);
-
         if (!_.isEmpty(waitFor)) {
             this.logger.log('Next skipped. Wait for ', waitFor);
         }
