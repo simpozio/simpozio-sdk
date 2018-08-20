@@ -1,5 +1,4 @@
 const gulp = require('gulp');
-const path = require('path');
 const babel = require('gulp-babel');
 const webpack = require('webpack-stream');
 const {babel: babelConf} = require('./package.json');
