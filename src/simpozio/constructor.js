@@ -59,7 +59,7 @@ export default class SimpozioClass {
             this.store.dispatch(terminalUpdateAction(configObj));
 
             SimpozioClassInstance = this;
-        } else if (!_.empty(configObj)) {
+        } else if (!_.isEmpty(configObj)) {
             SimpozioClassInstance.config(configObj);
         }
 

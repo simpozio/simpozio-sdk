@@ -39,6 +39,7 @@
         "webpack-stream": "^5.1.1",
         "gulp-babel": "^7.0.1"
     },
+    "main": "./src",
     "babel": {
         "plugins": ["transform-object-rest-spread"],
         "presets": ["env", "flow"]
