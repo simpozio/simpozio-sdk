@@ -45,15 +45,19 @@ export default class Next {
 
     _getNext(): {
         trigger: SmpzTriggerType,
-        interactions: Array<SmpzInteractionModelType>
+        interactions: {[key: string]: SmpzInteractionModelType}
     } {
         const suggestItem = _.head(_.get(this.store.getState(), 'triggers.suggest.items', []));
         const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
-        const interactions = _.map(
-            _.get(trigger, 'do'),
-            ({interaction: interactionId}: {interaction: string}): SmpzInteractionModelType =>
-                _.get(this.store.getState(), ['interactions', 'items', interactionId])
-        );
+        const interactions = {};
+        _.forEach(_.get(trigger, 'do'), ({interaction: interactionId}: {interaction: string}) => {
+            const interaction = _.get(this.store.getState(), ['interactions', 'items', interactionId], {});
+            interactions[interactionId] = interaction;
+
+            _.forEach(interaction.choice || interaction.sequence || interaction.variants, (interactionId: string) => {
+                interactions[interactionId] = _.get(this.store.getState(), ['interactions', 'items', interactionId]);
+            });
+        });
 
         return {
             trigger,

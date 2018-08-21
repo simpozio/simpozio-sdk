@@ -32,7 +32,7 @@ describe('Next', () => {
     test('onNext do activity', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t2');
-            expect(interactions[0].id).toBe('i2');
+            expect(interactions['i2'].id).toBe('i2');
             done();
         });
 
@@ -52,7 +52,7 @@ describe('Next', () => {
     test('onNext do signal', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t1');
-            expect(interactions[0].id).toBe('i1');
+            expect(interactions['i1'].id).toBe('i1');
             done();
         });
 
@@ -60,6 +60,47 @@ describe('Next', () => {
 
         simpozio.Journey.do({
             signal: 'signal1'
+        });
+    });
+
+    test('onNext do signal', done => {
+        const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
+            expect(trigger.id).toBe('t21');
+            expect(interactions['i21'].id).toBe('i21');
+            expect(interactions['i23'].id).toBe('i23');
+            expect(interactions['i24'].id).toBe('i24');
+            done();
+        });
+
+        simpozio.Journey.addTriggers([
+            makeTrigger(
+                {id: 't21', interaction: 'i21', on: 'signal21'},
+                makeTrigger({id: 't22', interaction: 'i22', on: 'signal22'})
+            )
+        ]);
+
+        simpozio.Journey.addExperiences([
+            makeInteraction({
+                id: 'e21',
+                data: {
+                    sequence: [
+                        makeInteraction({
+                            id: 'i21',
+                            data: {
+                                skippable: false,
+                                sequence: [makeInteraction({id: 'i23'}), makeInteraction({id: 'i24'})]
+                            }
+                        }),
+                        makeInteraction({id: 'i22'})
+                    ]
+                }
+            })
+        ]);
+
+        simpozio.Next.onNext(nextCallbackSpy);
+
+        simpozio.Journey.do({
+            signal: 'signal21'
         });
     });
 
