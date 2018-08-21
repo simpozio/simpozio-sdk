@@ -88,9 +88,9 @@ export default class Next {
     }
 
     _handleStoreChange() {
-        this._checkInvalidate();
         this._checkNext();
         this._doNext();
+        this._checkInvalidate();
         this._doInvalide();
     }
 
@@ -108,23 +108,23 @@ export default class Next {
     _checkSkippable(): boolean {
         const {interactions} = this._getNext();
         const done = _.keys(_.get(this.store.getState(), 'interactions.done'));
+        const waitForBefore = _.get(this.store.getState(), 'next.waitFor');
+
         const notSkippable = _.filter(
             interactions,
             (i: SmpzInteractionModelType): boolean =>
                 _.get(i, 'skippable') === false && !_.includes(done, _.get(i, 'id'))
         );
 
+        if (!_.isEmpty(waitForBefore)) {
+            this.logger.log('Next skipped. Wait for ', waitForBefore);
+        }
+
         if (!_.isEmpty(notSkippable)) {
             this.store.dispatch(nextSetWaitFor(notSkippable));
         }
 
-        const waitFor = _.get(this.store.getState(), 'next.waitFor');
-
-        if (!_.isEmpty(waitFor)) {
-            this.logger.log('Next skipped. Wait for ', waitFor);
-        }
-
-        return _.isEmpty(waitFor);
+        return _.isEmpty(waitForBefore);
     }
 
     invalidate() {

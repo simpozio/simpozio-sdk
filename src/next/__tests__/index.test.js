@@ -114,6 +114,36 @@ describe('Next', () => {
         }, 2000);
     });
 
+    test('skippable first', done => {
+        const nextCallbackSpy = jest.fn(() => {
+            expect(nextCallbackSpy.mock.calls.length).toBe(1);
+            done();
+        });
+
+        simpozio.Journey.addTriggers([
+            makeTrigger(
+                {id: 't21', interaction: 'i21', on: 'signal21'},
+                makeTrigger({id: 't22', interaction: 'i22', on: 'signal22'})
+            )
+        ]);
+
+        simpozio.Journey.addExperiences([
+            makeInteraction({
+                id: 'e21',
+                data: {
+                    sequence: [makeInteraction({id: 'i21', data: {skippable: false}}), makeInteraction({id: 'i22'})]
+                }
+            })
+        ]);
+
+        simpozio.Next.onNext(nextCallbackSpy);
+        setTimeout(() => {
+            simpozio.Journey.do({
+                signal: 'signal22'
+            });
+        }, 1000);
+    });
+
     afterEach(() => {
         simpozio.destroy();
     });
