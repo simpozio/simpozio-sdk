@@ -41,7 +41,7 @@ export default class SimpozioClass {
 
     constructor({config: configObj, heartbeat: HeartbeatConstructor, storage}: SmpzConstructorType): SimpozioClass {
         const heartbeat = _.get(configObj, 'heartbeat', {});
-        const persist = _.get(configObj, 'persist', true);
+        const persist = _.get(configObj, 'persist', false);
 
         if (!SimpozioClassInstance) {
             this.name = 'Simpozio';
