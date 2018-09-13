@@ -20,6 +20,7 @@
         "events": "^3.0.0",
         "flow-bin": "^0.75.0",
         "gulp": "^3.9.1",
+        "gulp-babel": "^7.0.1",
         "gulp-shell": "^0.6.5",
         "jest": "^23.2.0",
         "localforage": "^1.7.2",
@@ -27,8 +28,7 @@
         "moment": "^2.22.2",
         "raven-js": "^3.26.3",
         "react-native": "0.55.4",
-        "react-native-simpozio-background-worker":
-            "git@github.com:smekalka/react-native-simpozio-background-worker.git",
+        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git",
         "redux": "^4.0.0",
         "redux-devtools-extension": "^2.13.5",
         "redux-persist": "^5.10.0",
@@ -36,12 +36,16 @@
         "uuid": "^3.3.2",
         "webpack": "^4.14.0",
         "webpack-cli": "^3.0.8",
-        "webpack-stream": "^5.1.1",
-        "gulp-babel": "^7.0.1"
+        "webpack-stream": "^5.1.1"
     },
     "main": "./src",
     "babel": {
-        "plugins": ["transform-object-rest-spread"],
-        "presets": ["env", "flow"]
+        "plugins": [
+            "transform-object-rest-spread"
+        ],
+        "presets": [
+            "env",
+            "flow"
+        ]
     }
 }
