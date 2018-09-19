@@ -32,13 +32,6 @@ export const nextDoNext = (): SmpzReduxActionType => ({
     type: NEXT_DO_NEXT
 });
 
-export const nextSetWaitFor = (interactions: Array<SmpzInteractionModelType>): SmpzReduxActionType => ({
-    type: NEXT_SET_WAIT_FOR,
-    payload: {
-        interactions
-    }
-});
-
 export const nextDoInvalidate = (
     params?: {
         mapMiddleware?: Function,
