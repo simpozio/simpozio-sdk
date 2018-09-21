@@ -7,7 +7,7 @@ import {Store} from 'redux';
 import Logger from '../simpozio/logger';
 import Api from '../_api';
 import {getListenerKey} from '../simpozio/common/common.helpers';
-import {nextDoInvalidate, nextDoNext, nextSetWaitFor} from './actions';
+import {nextDoInvalidate, nextDoNext} from './actions';
 import {NEXT_EVENT, NEXT_INVALIDATE_EVENT} from './const';
 import type {SmpzInteractionModelType} from '../journey/interactions/reducer';
 import type {SmpzTriggerType} from '../journey/triggers/reducer';
@@ -103,32 +103,8 @@ export default class Next {
         if (this.lastTriggerSuggetUpdate !== lastTriggerSuggetUpdate) {
             this.lastTriggerSuggetUpdate = lastTriggerSuggetUpdate;
 
-            if (this._checkSkippable()) {
-                this.store.dispatch(nextDoNext());
-            }
+            this.store.dispatch(nextDoNext());
         }
-    }
-
-    _checkSkippable(): boolean {
-        const {interactions} = this._getNext();
-        const done = _.keys(_.get(this.store.getState(), 'interactions.done'));
-        const waitForBefore = _.get(this.store.getState(), 'next.waitFor');
-
-        const notSkippable = _.filter(
-            interactions,
-            (i: SmpzInteractionModelType): boolean =>
-                _.get(i, 'skippable') === false && !_.includes(done, _.get(i, 'id'))
-        );
-
-        if (!_.isEmpty(waitForBefore)) {
-            this.logger.log('Next skipped. Wait for ', waitForBefore);
-        }
-
-        if (!_.isEmpty(notSkippable)) {
-            this.store.dispatch(nextSetWaitFor(notSkippable));
-        }
-
-        return _.isEmpty(waitForBefore);
     }
 
     invalidate() {

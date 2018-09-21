@@ -44,8 +44,8 @@
 
 
         simpozio.Journey.addTriggers(_.times(10, i => makeTrigger(i, i - 1)));
-        simpozio.Journey.addExperiencies(_.times(2, i => makeInteraction('e' + i, {
-            sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j), (i * 5 + j) === 2 ? {skippable: false} : {}))
+        simpozio.Journey.addExperiences(_.times(2, i => makeInteraction('e' + i, {
+            sequence: _.times(5, j => makeInteraction('i' + (i * 5 + j)))
         })));
 
         simpozio.Next.onNext(({trigger, interactions}) => {
