@@ -31,14 +31,16 @@ export function initStore(storage?: Storage): Store {
         storage ? persistedReducer : reducers,
         {},
         composeWithDevTools(
-            applyMiddleware(thunk),
+            applyMiddleware(
+                thunk
+            ) /*,
             offline({
                 ...offlineConfig,
                 effect,
                 persistOptions: {
                     whitelist: ['offline']
                 }
-            })
+            })*/
         )
     );
 

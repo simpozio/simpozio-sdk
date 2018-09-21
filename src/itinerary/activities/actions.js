@@ -36,23 +36,23 @@ export const activitiesRegisterAction = (data?: SmpzActivityModelType | Array<Sm
             payload: {
                 interactions: _.get(getState(), 'interactions'),
                 activities: activity
-            },
-            meta: {
+            }
+            /* meta: {
                 offline: {
                     effect: {
                         url: '/self/activities',
                         method: 'post',
                         data: activity,
                         terminal: _.get(getState(), 'terminal')
-                    } /*,
+                    } /!*,
                     rollback: {
                         type: ACTIVITIES_REMOVE,
                         meta: {
                             activities: activity.id
                         }
-                    }*/
+                    }*!/
                 }
-            }
+            }*/
         });
     };
 };
