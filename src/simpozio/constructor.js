@@ -1,7 +1,6 @@
 // @flow
 
 import _ from 'lodash';
-import Raven from 'raven-js';
 import {Store} from 'redux';
 import {terminalUpdateAction} from '../_terminal/actions';
 import Heartbeat from '../heartbeat';
@@ -13,8 +12,6 @@ import type {SmpzTerminalModelType} from '../_terminal/reducer';
 import type {SmpzHeartbeatModelType} from '../heartbeat/reducer';
 
 import {initStore} from './store';
-
-Raven.config('https://462138e6f6724b9f8fd61e288ddef7e3@sentry.io/1237517').install();
 
 export type SmpzParamsType = SmpzTerminalModelType & {
     heartbeat: SmpzHeartbeatModelType
