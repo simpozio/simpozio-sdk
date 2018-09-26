@@ -3,6 +3,7 @@ import reducer from '../reducer.js';
 import {INTERACTIONS_ADD, INTERACTIONS_REMOVE} from '../const';
 import {EXPERIENCES_ADD, EXPERIENCES_REMOVE} from '../../experiences/const';
 import {ACTIVITIES_ADD, ACTIVITIES_REMOVE} from '../../../itinerary/activities/const';
+import uuidv4 from 'uuid/v4';
 
 jest.unmock('moment');
 
@@ -10,7 +11,8 @@ const makeInteraction = (id, data) =>
     _.assign(
         {},
         {
-            id: id,
+            localId: uuidv4(),
+            uri: id,
             type: 'event'
         },
         data
@@ -62,8 +64,8 @@ describe('Reducer Interactions', () => {
             }
         });
 
-        expect(_.get(result2, 'items.e1.id')).toBe('e1');
-        expect(_.get(result2, 'items.e2.id')).toBe('e2');
+        expect(_.find(result2.items, {uri: 'e1'})).toBeDefined();
+        expect(_.find(result2.items, {uri: 'e2'})).toBeDefined();
     });
 
     test(`${INTERACTIONS_ADD} Array`, () => {
@@ -81,9 +83,9 @@ describe('Reducer Interactions', () => {
             }
         });
 
-        expect(_.get(result2, 'items.e1.id')).toBe('e1');
-        expect(_.get(result2, 'items.e2.id')).toBe('e2');
-        expect(_.get(result2, 'items.e3.id')).toBe('e3');
+        expect(_.find(result2.items, {uri: 'e1'})).toBeDefined();
+        expect(_.find(result2.items, {uri: 'e2'})).toBeDefined();
+        expect(_.find(result2.items, {uri: 'e3'})).toBeDefined();
     });
 
     test(`${INTERACTIONS_REMOVE} One`, () => {
@@ -101,9 +103,9 @@ describe('Reducer Interactions', () => {
             }
         });
 
-        expect(_.get(result3, 'items.e2.id')).toBe('e2');
-        expect(_.get(result3, 'items.e3.id')).toBe('e3');
-        expect(_.get(result3, 'items.e1')).toBeUndefined();
+        expect(_.find(result3.items, {uri: 'e1'})).toBeUndefined();
+        expect(_.find(result3.items, {uri: 'e2'})).toBeDefined();
+        expect(_.find(result3.items, {uri: 'e3'})).toBeDefined();
     });
 
     test(`${INTERACTIONS_REMOVE} Array`, () => {
@@ -121,32 +123,38 @@ describe('Reducer Interactions', () => {
             }
         });
 
-        expect(_.get(result3, 'items.e3.id')).toBe('e3');
-        expect(_.get(result3, 'items.e2')).toBeUndefined();
-        expect(_.get(result3, 'items.e1')).toBeUndefined();
+        expect(_.find(result3.items, {uri: 'e1'})).toBeUndefined();
+        expect(_.find(result3.items, {uri: 'e2'})).toBeUndefined();
+        expect(_.find(result3.items, {uri: 'e3'})).toBeDefined();
     });
 
     test(`Linking`, () => {
+        const i2 = makeInteraction('e2');
+        const i3 = makeInteraction('e3');
+        const i1 = makeInteraction('e1', {
+            sequence: [i2, i3]
+        });
+
         const result1 = reducer(undefined, {
             type: INTERACTIONS_ADD,
             payload: {
-                interactions: makeInteraction('e1', {
-                    sequence: [makeInteraction('e2'), makeInteraction('e3')]
-                })
+                interactions: i1
             }
         });
 
-        expect(_.get(result1, 'items.e1.id')).toBe('e1');
-        expect(_.get(result1, 'items.e1.sequence')).toEqual(['e2', 'e3']);
+        expect(_.find(result1.items, {uri: 'e1'})).toBeDefined();
+        expect(_.get(_.find(result1.items, {uri: 'e1'}), 'sequence[0]')).toEqual({localId: i2.localId, uri: i2.uri});
+        expect(_.get(_.find(result1.items, {uri: 'e1'}), 'sequence[1]')).toEqual({localId: i3.localId, uri: i3.uri});
     });
 
     test(EXPERIENCES_ADD, () => {
         const result1 = makeComplexExperience();
 
-        expect(_.every(['e2', 'e3', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10'], id => _.get(result1, 'items.' + id))).toEqual(
+        expect(_.every(['e2', 'e3', 'e5', 'e6', 'e7', 'e8', 'e9', 'e10'], uri => _.find(result1.items, {uri}))).toEqual(
             true
         );
-        expect(_.get(result1, 'items.e5.variants')).toEqual(['e7', 'e8']);
+        expect(_.get(_.find(result1.items, {uri: 'e5'}), 'variants[0].uri')).toEqual('e7');
+        expect(_.get(_.find(result1.items, {uri: 'e5'}), 'variants[1].uri')).toEqual('e8');
     });
 
     test(EXPERIENCES_REMOVE, () => {
@@ -159,17 +167,19 @@ describe('Reducer Interactions', () => {
             }
         });
 
-        expect(_.every(['e2', 'e3'], id => _.get(result2, 'items.' + id))).toEqual(true);
+        expect(_.every(['e2', 'e3'], uri => _.find(result2.items, {uri}))).toEqual(true);
     });
 
     test(ACTIVITIES_ADD, () => {
         const result1 = makeComplexExperience();
+        const localId = uuidv4();
 
         const result2 = reducer(result1, {
             type: ACTIVITIES_ADD,
             payload: {
                 activities: {
                     id: 'a1',
+                    localId,
                     type: 'event',
                     actor: 'u1',
                     timeframe: {
@@ -188,12 +198,14 @@ describe('Reducer Interactions', () => {
 
     test(ACTIVITIES_ADD, () => {
         const result1 = makeComplexExperience();
+        const localId = uuidv4();
 
         const result2 = reducer(result1, {
             type: ACTIVITIES_ADD,
             payload: {
                 activities: {
                     id: 'a1',
+                    localId,
                     type: 'event',
                     actor: 'u1',
                     timeframe: {

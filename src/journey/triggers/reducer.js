@@ -4,9 +4,12 @@ import moment from 'moment';
 import type {SmpzGenericDataType, SmpzReduxActionType} from '../../simpozio/common/common.types';
 import {TRIGGERS_ADD, TRIGGERS_REMOVE} from './const';
 import {NEXT_DO_INVALIDATE} from '../../next/const';
+import type {SmpzExperiencesModelType} from '../experiences/reducer';
 
 export type SmpzTriggerType = {
-    id: string,
+    id?: string,
+    localId: string,
+    uri?: string,
     caption?: string,
     touchpoints?: Array<string>,
     priority: number,
@@ -28,7 +31,7 @@ export type SmpzTriggerCollectionType = {
     items: {[key: string]: SmpzTriggerType}
 };
 
-export type SmpzTriggerSuggestType = {triggerId: string, rank: number};
+export type SmpzTriggerSuggestType = {triggerDescriptor: string, rank: number};
 
 const initialState = {
     lastUpdate: 0,
@@ -46,7 +49,7 @@ export default (
     switch (action.type) {
         case TRIGGERS_ADD: {
             const newTriggers = _.castArray(_.get(action, 'payload.triggers', []));
-            const newItems = _.assign({}, triggers.items, _.keyBy(newTriggers, 'id'));
+            const newItems = _.assign({}, triggers.items, _.keyBy(newTriggers, 'localId'));
 
             return _.assign({}, triggers, {
                 lastUpdate: moment().toISOString(),
@@ -54,8 +57,14 @@ export default (
             });
         }
         case TRIGGERS_REMOVE: {
-            const newTriggers = _.get(action, 'payload.triggers', []);
-            const newItems = _.omit(triggers.items, newTriggers);
+            const removeTriggers = _.get(action, 'payload.triggers', []);
+            const newItems = _.filter(
+                triggers.items,
+                (item: SmpzExperiencesModelType): boolean =>
+                    !_.includes(removeTriggers, item.id) &&
+                    !_.includes(removeTriggers, item.uri) &&
+                    !_.includes(removeTriggers, item.localId)
+            );
 
             return _.assign({}, triggers, {
                 lastUpdate: moment().toISOString(),
@@ -77,20 +86,20 @@ export default (
 
                     if (signal && !_.isEmpty(on) && _.includes(on, signal)) {
                         return {
-                            triggerId: trigger.id,
+                            triggerDescriptor: trigger.id || trigger.localId,
                             rank: 1
                         };
                     } else if (_.isString(after) && timestamp) {
                         // TODO: make right normalization
                         return {
-                            triggerId: trigger.id,
+                            triggerDescriptor: trigger.id || trigger.localId,
                             rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
                         };
                     } else if (_.isObject(after) && timestamp) {
                         const {interaction, choice} = after;
                         if (choice === input && activityInteraction === interaction) {
                             return {
-                                triggerId: trigger.id,
+                                triggerDescriptor: trigger.id || trigger.localId,
                                 rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
                             };
                         }
@@ -103,7 +112,10 @@ export default (
 
             const ifSuggerstUpdate =
                 !_.isEmpty(suggest) &&
-                !_.isEqual(_.map(_.get(triggers, 'suggest.items', []), 'triggerId'), _.map(suggest, 'triggerId'));
+                !_.isEqual(
+                    _.map(_.get(triggers, 'suggest.items', []), 'triggerDescriptor'),
+                    _.map(suggest, 'triggerId')
+                );
 
             return _.assign({}, triggers, {
                 suggest: {

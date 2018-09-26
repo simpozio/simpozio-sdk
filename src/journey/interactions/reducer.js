@@ -9,34 +9,33 @@ import type {SmpzExperiencesModelType} from '../experiences/reducer';
 import {ACTIVITIES_ADD, ACTIVITIES_REGISTER, ACTIVITIES_REMOVE} from '../../itinerary/activities/const';
 import type {SmpzActivityModelType} from '../../itinerary/activities/reducer';
 
-export type SmpzInteractionModelType =
-    | {
-          id: string,
-          type: string,
-          touchpoints?: Array<string>,
-          slug?: string,
-          uri?: string,
-          title?: string,
-          description?: string,
-          tags?: Array<string>,
-          targeting?: SmpzGenericDataType,
-          experienceId?: string,
-          // prettier-ignore
-          participants?: number | {| min?: number | string, max?: number | string |},
+export type SmpzInteractionModelType = {
+    id?: string,
+    localId: string,
+    type?: string,
+    touchpoints?: Array<string>,
+    slug?: string,
+    uri?: string,
+    title?: string,
+    description?: string,
+    tags?: Array<string>,
+    targeting?: SmpzGenericDataType,
+    experienceId?: string,
+    // prettier-ignore
+    participants?: number | {| min?: number | string, max?: number | string |},
 
-          // prettier-ignore
-          duration?: number | string | {| min?: number | string, max?: number | string |},
-          sequence?: Array<SmpzInteractionModelType> | Array<string>,
-          variants?: Array<SmpzInteractionModelType> | Array<string>,
-          choice?: Array<SmpzInteractionModelType> | Array<string>,
-          skippable?: boolean,
-          pattern?: string,
-          messages?: Array<SmpzInteractionMessageModelType>,
-          media?: Array<SmpzInteractionMediaModelType>,
-          input?: SmpzInteractionInputModelType,
-          hooks?: Array<string>
-      }
-    | string;
+    // prettier-ignore
+    duration?: number | string | {| min?: number | string, max?: number | string |},
+    sequence?: Array<SmpzInteractionModelType>,
+    variants?: Array<SmpzInteractionModelType>,
+    choice?: Array<SmpzInteractionModelType>,
+    skippable?: boolean,
+    pattern?: string,
+    messages?: Array<SmpzInteractionMessageModelType>,
+    media?: Array<SmpzInteractionMediaModelType>,
+    input?: SmpzInteractionInputModelType,
+    hooks?: Array<string>
+};
 
 export type SmpzInteractionMediaModelType = {
     url: string,
@@ -92,11 +91,12 @@ export default (
 ): SmpzInteractionsCollectionType => {
     switch (action.type) {
         case INTERACTIONS_ADD: {
-            const newInteractions = _.castArray(_.get(action, 'payload.interactions', []));
+            const newInteractions = _.castArray(_.get(action, 'payload.interactions'));
+
             const newItems = _.assign(
                 {},
                 interactions.items,
-                _.keyBy(experienceInteractionsLinking(newInteractions), 'id')
+                _.keyBy(experienceInteractionsLinking(newInteractions), 'localId')
             );
 
             return _.assign({}, interactions, {
@@ -104,8 +104,14 @@ export default (
             });
         }
         case INTERACTIONS_REMOVE: {
-            const newInteractions = _.get(action, 'payload.interactions', []);
-            const newItems = _.omit(interactions.items, newInteractions);
+            const removeInteractions = _.get(action, 'payload.interactions', []);
+            const newItems = _.filter(
+                interactions.items,
+                (item: SmpzExperiencesModelType): boolean =>
+                    !_.includes(removeInteractions, item.id) &&
+                    !_.includes(removeInteractions, item.uri) &&
+                    !_.includes(removeInteractions, item.localId)
+            );
 
             return _.assign({}, interactions, {
                 items: newItems
@@ -127,7 +133,7 @@ export default (
                 if (!_.isEmpty(items)) {
                     _.forEach(items, (item: SmpzInteractionModelType) => {
                         if (typeof item !== 'string') {
-                            acc[item.id] = experienceId
+                            acc[_.get(item, 'localId')] = experienceId
                                 ? _.assign({}, interactionLinking(item), {
                                       experienceId
                                   })
@@ -137,7 +143,7 @@ export default (
                     });
                 }
 
-                acc[root.id] = experienceId
+                acc[_.get(root, 'localId')] = experienceId
                     ? _.assign({}, interactionLinking(root), {
                           experienceId
                       })
@@ -159,10 +165,10 @@ export default (
                                     item: SmpzInteractionModelType
                                 ): SmpzInteractionItemsType => {
                                     if (typeof item !== 'string') {
-                                        recursiveHelper(item, acc, experience.id);
+                                        recursiveHelper(item, acc, experience.localId);
                                         return _.assign({}, acc, {
-                                            [item.id]: _.assign({}, interactionLinking(item), {
-                                                experienceId: experience.id
+                                            [_.get(item, 'localId')]: _.assign({}, interactionLinking(item), {
+                                                experienceId: experience.localId
                                             })
                                         });
                                     }
@@ -209,7 +215,7 @@ export default (
                             _.assign({}, acc, {
                                 [activity.interaction]: {
                                     timestamp: getTimestampFromTimeframe(activity),
-                                    activity: activity.id
+                                    activity: _.get(activity, 'id') || _.get(activity, 'localId')
                                 }
                             }),
                         {}
@@ -223,8 +229,8 @@ export default (
             return _.assign({}, interactions, {
                 done: _.reduce(
                     activities,
-                    (items: SmpzInteractionDoneType, activityId: string): SmpzInteractionDoneType =>
-                        _.omitBy(items, ({activity}: SmpzInteractionDoneType): boolean => activityId === activity),
+                    (items: SmpzInteractionDoneType, activityLocalId: string): SmpzInteractionDoneType =>
+                        _.omitBy(items, ({activity}: SmpzInteractionDoneType): boolean => activityLocalId === activity),
                     interactions.done
                 )
             });

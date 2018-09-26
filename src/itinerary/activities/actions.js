@@ -26,11 +26,11 @@ export const activivitesRemoveAction = (data?: string | Array<string>): SmpzRedu
 });
 
 export const activitiesRegisterAction = (data?: SmpzActivityModelType | Array<SmpzActivityModelType>): Function => {
-    const activity = _.assign({}, data, {
-        id: uuidv4()
-    });
-
     return (dispatch: Function, getState: Function) => {
+        const activity = _.assign({}, data, {
+            localId: uuidv4()
+        });
+
         dispatch({
             type: ACTIVITIES_REGISTER,
             payload: {

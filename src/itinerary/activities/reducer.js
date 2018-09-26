@@ -62,15 +62,6 @@ export default (
             const newActivities = _.castArray(_.get(action, 'payload.activities', []));
             const newItems = _.assign({}, activities.items, _.keyBy(newActivities, 'id'));
 
-            if (
-                _.every(
-                    _.map(newActivities, 'id'),
-                    (id: string): boolean => !_.isEmpty(_.get(activities, ['items', id]))
-                )
-            ) {
-                return activities;
-            }
-
             const newOrder = _.chain(newItems)
                 .sortBy((item: SmpzActivityModelType): number => getTimestampFromTimeframe(item))
                 .map('id')

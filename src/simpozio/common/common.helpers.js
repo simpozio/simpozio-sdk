@@ -2,8 +2,11 @@
 
 import _ from 'lodash';
 import moment from 'moment';
-import type {SmpzInteractionModelType} from '../../journey/interactions/reducer';
+import uuidv4 from 'uuid/v4';
+import type {SmpzInteractionItemsType, SmpzInteractionModelType} from '../../journey/interactions/reducer';
 import {LISTENER_META} from './common.consts';
+import type {SmpzTriggerCollectionType, SmpzTriggerType} from '../../journey/triggers/reducer';
+import type {SmpzExperiencesModelType} from '../../journey/experiences/reducer';
 
 export const getTimestampFromTimeframe = (item: mixed): number => {
     const timeframe = _.get(item, 'timeframe');
@@ -21,8 +24,8 @@ export const interactionLinking = (interaction: SmpzInteractionModelType): SmpzI
     let variants;
     let choice;
 
-    const linkItem = (interaction: SmpzInteractionModelType | string): string | SmpzInteractionModelType =>
-        typeof interaction !== 'string' && interaction.id ? interaction.id : interaction;
+    const linkItem = (interaction: SmpzInteractionModelType): SmpzInteractionModelType =>
+        _.pick(interaction, ['id', 'localId', 'uri']);
 
     if (interaction.sequence) {
         sequence = _.map(interaction.sequence, linkItem);
@@ -67,4 +70,28 @@ export const getListenerKey = (listener: () => any): string => {
     }
 
     return listener[LISTENER_META];
+};
+
+export const getItemByDescriptor = (allInteractions: any, interactionDescriptor: string): any =>
+    _.find(allInteractions, (interaction: SmpzInteractionModelType): boolean => {
+        return (
+            interaction.id === interactionDescriptor ||
+            interaction.uri === interactionDescriptor ||
+            interaction.localId === interactionDescriptor
+        );
+    });
+
+export const makelocalIds = (root: any): any => {
+    let queue = [root];
+    while (queue.length > 0) {
+        const item = queue.pop();
+        if (!item.localId) {
+            _.set(item, 'localId', uuidv4());
+        }
+
+        if (item.choice || item.sequence || item.variants)
+            queue = _.concat(queue, item.choice || item.sequence || item.variants);
+    }
+
+    return root;
 };

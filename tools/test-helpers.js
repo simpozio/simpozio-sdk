@@ -1,7 +1,9 @@
 import _ from 'lodash';
+import uuidv4 from 'uuid/v4';
 
 export const makeTrigger = ({id, interaction, after, on}) => ({
     id: id,
+    localId: uuidv4(),
     priority: 1,
     if: {
         conditions: {
@@ -18,6 +20,7 @@ export const makeTrigger = ({id, interaction, after, on}) => ({
 
 export const makeActivity = ({id, timestamp, interaction}) => ({
     id: id,
+    localId: uuidv4(),
     actor: 'actor',
     interaction: interaction,
     trigger: 'trigger',
@@ -29,11 +32,12 @@ export const makeActivity = ({id, timestamp, interaction}) => ({
     }
 });
 
-export const makeInteraction = ({id, data}) =>
+export const makeInteraction = ({uri, data}) =>
     _.assign(
         {},
         {
-            id: id,
+            localId: uuidv4(),
+            uri,
             type: 'event'
         },
         data

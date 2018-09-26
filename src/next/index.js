@@ -6,7 +6,7 @@ import {Store} from 'redux';
 
 import Logger from '../simpozio/logger';
 import Api from '../_api';
-import {getListenerKey} from '../simpozio/common/common.helpers';
+import {getItemByDescriptor, getListenerKey} from '../simpozio/common/common.helpers';
 import {nextDoInvalidate, nextDoNext} from './actions';
 import {NEXT_EVENT, NEXT_INVALIDATE_EVENT} from './const';
 import type {SmpzInteractionModelType} from '../journey/interactions/reducer';
@@ -47,16 +47,25 @@ export default class Next {
         trigger: SmpzTriggerType,
         interactions: {[key: string]: SmpzInteractionModelType}
     } {
-        const suggestItem = _.head(_.get(this.store.getState(), 'triggers.suggest.items', []));
-        const trigger = _.get(this.store.getState(), ['triggers', 'items', _.get(suggestItem, 'triggerId')]);
+        const state = this.store.getState();
+        const suggestItem = _.head(_.get(state, 'triggers.suggest.items', []));
+        const trigger = getItemByDescriptor(
+            _.get(state, ['triggers', 'items']),
+            _.get(suggestItem, 'triggerDescriptor')
+        );
         const interactions = {};
-        _.forEach(_.get(trigger, 'do'), ({interaction: interactionId}: {interaction: string}) => {
-            const interaction = _.get(this.store.getState(), ['interactions', 'items', interactionId], {});
-            interactions[interactionId] = interaction;
+        const allInteractions = _.get(state, ['interactions', 'items']);
+        _.forEach(_.get(trigger, 'do'), ({interaction: interactionDescriptor}: {interaction: string}) => {
+            const interaction = getItemByDescriptor(allInteractions, interactionDescriptor);
 
-            _.forEach(interaction.choice || interaction.sequence || interaction.variants, (interactionId: string) => {
-                interactions[interactionId] = _.get(this.store.getState(), ['interactions', 'items', interactionId]);
-            });
+            interactions[interactionDescriptor] = interaction;
+
+            _.forEach(
+                interaction.choice || interaction.sequence || interaction.variants,
+                ({id, localId, uri}: SmpzInteractionModelType) => {
+                    interactions[uri || localId] = getItemByDescriptor(allInteractions, uri || localId);
+                }
+            );
         });
 
         return {

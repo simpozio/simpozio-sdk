@@ -20,9 +20,9 @@ describe('Next', () => {
         simpozio.Journey.addExperiences(
             _.times(2, i =>
                 makeInteraction({
-                    id: 'e' + i,
+                    uri: 'e' + i,
                     data: {
-                        sequence: _.times(5, j => makeInteraction({id: 'i' + (i * 5 + j)}))
+                        sequence: _.times(5, j => makeInteraction({uri: 'i' + (i * 5 + j)}))
                     }
                 })
             )
@@ -32,7 +32,7 @@ describe('Next', () => {
     test('onNext do activity', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t2');
-            expect(interactions['i2'].id).toBe('i2');
+            expect(interactions['i2'].uri).toBe('i2');
             done();
         });
 
@@ -49,10 +49,32 @@ describe('Next', () => {
         });
     });
 
+    test('onNext do wrong activity', () => {
+        const nextCallbackSpy = jest.fn();
+
+        simpozio.Next.onNext(nextCallbackSpy);
+
+        simpozio.Journey.do({
+            activity: {
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i123',
+                trigger: 't1',
+                input: 1
+            }
+        });
+
+        jest.runAllTimers();
+
+        return new Promise(resolve => setTimeout(() => resolve(), 4000)).then(() =>
+            expect(nextCallbackSpy).not.toHaveBeenCalled()
+        );
+    });
+
     test('onNext do signal', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t1');
-            expect(interactions['i1'].id).toBe('i1');
+            expect(interactions['i1'].uri).toBe('i1');
             done();
         });
 
@@ -66,9 +88,9 @@ describe('Next', () => {
     test('onNext do signal', done => {
         const nextCallbackSpy = jest.fn(({trigger, interactions}) => {
             expect(trigger.id).toBe('t21');
-            expect(interactions['i21'].id).toBe('i21');
-            expect(interactions['i23'].id).toBe('i23');
-            expect(interactions['i24'].id).toBe('i24');
+            expect(interactions['i21'].uri).toBe('i21');
+            expect(interactions['i23'].uri).toBe('i23');
+            expect(interactions['i24'].uri).toBe('i24');
             done();
         });
 
@@ -85,13 +107,13 @@ describe('Next', () => {
                 data: {
                     sequence: [
                         makeInteraction({
-                            id: 'i21',
+                            uri: 'i21',
                             data: {
                                 skippable: false,
-                                sequence: [makeInteraction({id: 'i23'}), makeInteraction({id: 'i24'})]
+                                sequence: [makeInteraction({uri: 'i23'}), makeInteraction({uri: 'i24'})]
                             }
                         }),
-                        makeInteraction({id: 'i22'})
+                        makeInteraction({uri: 'i22'})
                     ]
                 }
             })
@@ -153,36 +175,6 @@ describe('Next', () => {
                 }
             });
         }, 2000);
-    });
-
-    test('skippable first', done => {
-        const nextCallbackSpy = jest.fn(() => {
-            expect(nextCallbackSpy.mock.calls.length).toBe(1);
-            done();
-        });
-
-        simpozio.Journey.addTriggers([
-            makeTrigger(
-                {id: 't21', interaction: 'i21', on: 'signal21'},
-                makeTrigger({id: 't22', interaction: 'i22', on: 'signal22'})
-            )
-        ]);
-
-        simpozio.Journey.addExperiences([
-            makeInteraction({
-                id: 'e21',
-                data: {
-                    sequence: [makeInteraction({id: 'i21', data: {skippable: false}}), makeInteraction({id: 'i22'})]
-                }
-            })
-        ]);
-
-        simpozio.Next.onNext(nextCallbackSpy);
-        setTimeout(() => {
-            simpozio.Journey.do({
-                signal: 'signal22'
-            });
-        }, 1000);
     });
 
     afterEach(() => {
