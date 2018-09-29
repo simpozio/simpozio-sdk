@@ -46,7 +46,7 @@ export default class Next {
     _getNext(): {
         trigger: SmpzTriggerType,
         interactions: {[key: string]: SmpzInteractionModelType}
-    } {
+    } | null {
         const state = this.store.getState();
         const suggestItem = _.head(_.get(state, 'triggers.suggest.items', []));
         const trigger = getItemByDescriptor(
@@ -58,15 +58,21 @@ export default class Next {
         _.forEach(_.get(trigger, 'do'), ({interaction: interactionDescriptor}: {interaction: string}) => {
             const interaction = getItemByDescriptor(allInteractions, interactionDescriptor);
 
-            interactions[interactionDescriptor] = interaction;
+            if (interaction) {
+                interactions[interactionDescriptor] = interaction;
 
-            _.forEach(
-                interaction.choice || interaction.sequence || interaction.variants,
-                ({id, localId, uri}: SmpzInteractionModelType) => {
-                    interactions[uri || localId] = getItemByDescriptor(allInteractions, uri || localId);
-                }
-            );
+                _.forEach(
+                    interaction.choice || interaction.sequence || interaction.variants,
+                    ({id, localId, uri}: SmpzInteractionModelType) => {
+                        interactions[uri || localId] = getItemByDescriptor(allInteractions, uri || localId);
+                    }
+                );
+            }
         });
+
+        if (!trigger || !interactions) {
+            return null;
+        }
 
         return {
             trigger,
@@ -78,8 +84,11 @@ export default class Next {
         const {lastDoNext} = _.get(this.store.getState(), 'next', {});
         if (this.lastDoNext !== lastDoNext) {
             this.lastDoNext = lastDoNext;
+            const next = this._getNext();
 
-            eventEmitter.emit(NEXT_EVENT, this._getNext());
+            if (next) {
+                eventEmitter.emit(NEXT_EVENT, next);
+            }
         }
     }
 

@@ -4,7 +4,7 @@ import SimpozioClass from '../../../src/index';
 import {makeInteraction, makeTrigger} from '../../../tools/test-helpers';
 
 let simpozio;
-
+jest.useFakeTimers();
 jest.disableAutomock();
 
 describe('Next', () => {
@@ -63,12 +63,13 @@ describe('Next', () => {
                 input: 1
             }
         });
-
+        jest.useRealTimers();
         jest.runAllTimers();
 
-        return new Promise(resolve => setTimeout(() => resolve(), 4000)).then(() =>
-            expect(nextCallbackSpy).not.toHaveBeenCalled()
-        );
+        return new Promise(resolve => setTimeout(() => resolve(), 4000)).then(() => {
+            jest.useFakeTimers();
+            expect(nextCallbackSpy).not.toHaveBeenCalled();
+        });
     });
 
     test('onNext do signal', done => {
@@ -143,38 +144,6 @@ describe('Next', () => {
                 input: 1
             }
         });
-    });
-
-    test('skippable', done => {
-        const nextCallbackSpy = jest.fn(() => {
-            expect(nextCallbackSpy.mock.calls.length).toBe(1);
-            done();
-        });
-
-        simpozio.Next.onNext(nextCallbackSpy);
-        setTimeout(() => {
-            simpozio.Journey.do({
-                activity: {
-                    type: 'test',
-                    timestamp: moment().toISOString(),
-                    interaction: 'i1',
-                    trigger: 't1',
-                    input: 1
-                }
-            });
-        }, 1000);
-
-        setTimeout(() => {
-            simpozio.Journey.do({
-                activity: {
-                    type: 'test',
-                    timestamp: moment().toISOString(),
-                    interaction: 'i3',
-                    trigger: 't3',
-                    input: 1
-                }
-            });
-        }, 2000);
     });
 
     afterEach(() => {
