@@ -127,6 +127,53 @@ describe('Next', () => {
         });
     });
 
+    test('onNext not called twice', done => {
+        const nextCallbackSpy = jest.fn();
+        simpozio.Next.onNext(nextCallbackSpy);
+
+        jest.useRealTimers();
+        jest.runAllTimers();
+
+        simpozio.Journey.do({
+            activity: {
+                type: 'test',
+                timestamp: moment().toISOString(),
+                interaction: 'i2',
+                trigger: 't2',
+                input: 1
+            }
+        });
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i2',
+                    trigger: 't2',
+                    input: 1
+                }
+            });
+        }, 1000);
+
+        setTimeout(() => {
+            simpozio.Journey.do({
+                activity: {
+                    type: 'test',
+                    timestamp: moment().toISOString(),
+                    interaction: 'i2',
+                    trigger: 't2',
+                    input: 1
+                }
+            });
+        }, 2000);
+
+        setTimeout(() => {
+            expect(nextCallbackSpy.mock.calls.length).toBe(1);
+            done();
+        }, 3000);
+    });
+
     test('onInvalidate', done => {
         const invalidateCallbackSpy = jest.fn(() => {
             expect(invalidateCallbackSpy.mock.calls.length).toBe(1);

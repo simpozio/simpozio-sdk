@@ -176,4 +176,21 @@ describe('getItemByDescriptor', () => {
 
         expect(_.get(result, 'uri')).toBe('i2');
     });
+    test('getItemByDescriptor by descriptor', () => {
+        const result = getItemByDescriptor(
+            {
+                i1: {
+                    uri: 'i1'
+                },
+                i2: {
+                    uri: 'i2'
+                }
+            },
+            {
+                uri: 'i2'
+            }
+        );
+
+        expect(_.get(result, 'uri')).toBe('i2');
+    });
 });

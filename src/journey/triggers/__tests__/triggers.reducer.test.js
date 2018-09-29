@@ -176,7 +176,7 @@ describe('Reducer Triggers', () => {
             }
         });
 
-        expect(_.map(result2.suggest.items, 'triggerDescriptor')).toEqual(['t2', 't1']);
+        expect(_.map(result2.suggest.items, 'triggerDescriptor.id')).toEqual(['t2', 't1']);
     });
 
     test(`${NEXT_DO_INVALIDATE} signal`, () => {
@@ -198,6 +198,6 @@ describe('Reducer Triggers', () => {
             }
         });
 
-        expect(_.map(result2.suggest.items, 'triggerDescriptor')).toEqual(['t2']);
+        expect(_.map(result2.suggest.items, 'triggerDescriptor.id')).toEqual(['t2']);
     });
 });

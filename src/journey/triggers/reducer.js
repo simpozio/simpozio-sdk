@@ -31,7 +31,14 @@ export type SmpzTriggerCollectionType = {
     items: {[key: string]: SmpzTriggerType}
 };
 
-export type SmpzTriggerSuggestType = {triggerDescriptor: string, rank: number};
+export type SmpzTriggerSuggestType = {
+    triggerDescriptor: {
+        id?: string,
+        uri?: string,
+        localId?: string
+    },
+    rank: number
+};
 
 const initialState = {
     lastUpdate: 0,
@@ -86,20 +93,32 @@ export default (
 
                     if (signal && !_.isEmpty(on) && _.includes(on, signal)) {
                         return {
-                            triggerDescriptor: trigger.id || trigger.localId,
+                            triggerDescriptor: {
+                                id: trigger.id,
+                                localId: trigger.localId,
+                                uri: trigger.uri
+                            },
                             rank: 1
                         };
                     } else if (_.isString(after) && timestamp) {
                         // TODO: make right normalization
                         return {
-                            triggerDescriptor: trigger.id || trigger.localId,
+                            triggerDescriptor: {
+                                id: trigger.id,
+                                localId: trigger.localId,
+                                uri: trigger.uri
+                            },
                             rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
                         };
                     } else if (_.isObject(after) && timestamp) {
                         const {interaction, choice} = after;
                         if (choice === input && activityInteraction === interaction) {
                             return {
-                                triggerDescriptor: trigger.id || trigger.localId,
+                                triggerDescriptor: {
+                                    id: trigger.id,
+                                    localId: trigger.localId,
+                                    uri: trigger.uri
+                                },
                                 rank: 1 - (moment().valueOf() - moment(timestamp).valueOf()) / 10000000000
                             };
                         }
@@ -110,12 +129,19 @@ export default (
                 .take(5)
                 .valueOf();
 
-            const ifSuggerstUpdate =
-                !_.isEmpty(suggest) &&
-                !_.isEqual(
-                    _.map(_.get(triggers, 'suggest.items', []), 'triggerDescriptor'),
-                    _.map(suggest, 'triggerId')
-                );
+            const currentSuggestIds = _.join(
+                _.map(_.get(triggers, 'suggest.items', []), (i: SmpzTriggerSuggestType): string =>
+                    _.get(i, 'triggerDescriptor.localId')
+                ),
+                ','
+            );
+
+            const newSuggestIds = _.join(
+                _.map(suggest, (i: SmpzTriggerSuggestType): string => _.get(i, 'triggerDescriptor.localId')),
+                ','
+            );
+
+            const ifSuggerstUpdate = !_.isEmpty(suggest) && currentSuggestIds !== newSuggestIds;
 
             return _.assign({}, triggers, {
                 suggest: {

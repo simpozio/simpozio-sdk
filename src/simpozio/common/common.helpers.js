@@ -72,14 +72,21 @@ export const getListenerKey = (listener: () => any): string => {
     return listener[LISTENER_META];
 };
 
-export const getItemByDescriptor = (allInteractions: any, interactionDescriptor: string): any =>
-    _.find(allInteractions, (interaction: SmpzInteractionModelType): boolean => {
+export const getItemByDescriptor = (allIitems: any, _descriptor: any): any => {
+    let descriptor = _descriptor;
+
+    if (_.isObject(_descriptor)) {
+        descriptor = descriptor.localId || descriptor.id || descriptor.uri;
+    }
+
+    return _.find(allIitems, (item: SmpzInteractionModelType): boolean => {
         return (
-            interaction.id === interactionDescriptor ||
-            interaction.uri === interactionDescriptor ||
-            interaction.localId === interactionDescriptor
+            _.get(item, 'id') === descriptor ||
+            _.get(item, 'uri') === descriptor ||
+            _.get(item, 'localId') === descriptor
         );
     });
+};
 
 export const makelocalIds = (root: any): any => {
     let queue = [root];
