@@ -1,6 +1,6 @@
 {
     "name": "simpozio-sdk",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "scripts": {
         "postinstall": "npx gulp babel",
         "dev": "npx gulp; npx gulp watch",
@@ -28,7 +28,7 @@
         "moment": "^2.22.2",
         "raven-js": "^3.26.3",
         "react-native": "0.55.4",
-        "react-native-simpozio-background-worker": "git@github.com:smekalka/react-native-simpozio-background-worker.git",
+        "react-native-simpozio-background-worker": "^0.1.0",
         "redux": "^4.0.0",
         "redux-devtools-extension": "^2.13.5",
         "redux-persist": "^5.10.0",
@@ -40,12 +40,16 @@
     },
     "main": "./src",
     "babel": {
-        "plugins": [
-            "transform-object-rest-spread"
-        ],
-        "presets": [
-            "env",
-            "flow"
-        ]
+        "plugins": ["transform-object-rest-spread"],
+        "presets": ["env", "flow"]
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/simpozio/simpozio-sdk.git"
+    },
+    "keywords": ["react", "native", "simpozio", "sdk"],
+    "author": "Dmitriy Korobov",
+    "bugs": {
+        "url": "https://github.com/simpozio/simpozio-sdk#issues"
     }
 }
