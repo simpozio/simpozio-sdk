@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.0.7] - _29.09.2018_
+- npm package
+
 ## [0.0.5] - _29.09.2018_
 - do not call next if suggest hasn't been changed
 
