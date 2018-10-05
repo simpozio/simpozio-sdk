@@ -52,18 +52,18 @@ export default class Ping {
     }
 
     start() {
-        const {debug, baseUrl} = _.get(this.store.getState(), 'terminal', {});
+        const {debug} = _.get(this.store.getState(), 'terminal', {});
 
         SimpozioBackgroundWorker.startPing(this._getNativeMetadata())
             .then(() => {
                 this._isStarted = false;
                 if (debug) {
-                    console.log('SDK Ping STOPPED');
+                    console.log('SDK PING STARTED');
                 }
             })
             .catch((error: SmpzGenericDataType) => {
                 if (debug) {
-                    console.log('SDK Ping ERROR', error);
+                    console.log('SDK PING ERROR', error);
                 }
             });
     }
@@ -75,12 +75,12 @@ export default class Ping {
             .then(() => {
                 this._isStarted = true;
                 if (debug) {
-                    console.log('SDK Ping STARTED');
+                    console.log('SDK PING STOPPED ');
                 }
             })
             .catch((error: SmpzGenericDataType) => {
                 if (debug) {
-                    console.log('SDK Ping ERROR', error);
+                    console.log('SDK PING ERROR', error);
                 }
             });
     }
