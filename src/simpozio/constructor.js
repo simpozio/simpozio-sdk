@@ -4,6 +4,7 @@ import _ from 'lodash';
 import {Store} from 'redux';
 import {terminalUpdateAction} from '../_terminal/actions';
 import Heartbeat from '../heartbeat';
+import Ping from '../../native/ping';
 import JourneyConstructor from '../journey';
 import ItineraryConstructor from '../itinerary';
 import NextConstructor from '../next';
@@ -17,7 +18,12 @@ export type SmpzParamsType = SmpzTerminalModelType & {
     heartbeat: SmpzHeartbeatModelType
 };
 
-export type SmpzConstructorType = {config?: SmpzTerminalModelType, heartbeat: Class<Heartbeat>, storage?: Storage};
+export type SmpzConstructorType = {
+    config?: SmpzTerminalModelType,
+    heartbeat: Class<Heartbeat>,
+    storage?: Storage,
+    ping?: Class<Ping>
+};
 
 let SimpozioClassInstance: SimpozioClass | null = null;
 
@@ -34,10 +40,17 @@ export default class SimpozioClass {
     Journey: JourneyConstructor;
     Next: NextConstructor;
     Itinerary: ItineraryConstructor;
+    Ping: Ping;
     config: Function;
 
-    constructor({config: configObj, heartbeat: HeartbeatConstructor, storage}: SmpzConstructorType): SimpozioClass {
+    constructor({
+        config: configObj,
+        heartbeat: HeartbeatConstructor,
+        storage,
+        ping: PingConstructor
+    }: SmpzConstructorType): SimpozioClass {
         const heartbeat = _.get(configObj, 'heartbeat', {});
+        const ping = _.get(configObj, 'ping', false);
         const persist = _.get(configObj, 'persist', false);
 
         if (!SimpozioClassInstance) {
@@ -52,6 +65,10 @@ export default class SimpozioClass {
                 store,
                 initialData: heartbeat
             });
+
+            if (ping !== false && PingConstructor) {
+                this.Ping = new PingConstructor({store});
+            }
 
             this.store.dispatch(terminalUpdateAction(configObj));
 
@@ -85,6 +102,11 @@ export default class SimpozioClass {
         this.Itinerary.destroy();
         this.Next.destroy();
         this.Heartbeat.destroy();
+
+        if (this.Ping) {
+            this.Ping.destroy();
+        }
+
         SimpozioClassInstance = null;
     }
 }

@@ -40,6 +40,11 @@ Initialize local data store and starts ```heartbeat``` and ```trace``` by defaul
 
 ```false``` to avoid heartbeat
 
+#### config.ping
+**{boolean}**  (default ```false```, Android only)
+
+Get time http time sync events
+
 #### config.persist
 **{boolean}** Persist data on client (default ```true```)
 

@@ -3,3 +3,6 @@ export const COMMON_METHOD_REMOVE = 'COMMON_METHOD_REMOVE';
 export const COMMON_METHOD_SET = 'COMMON_METHOD_SET';
 export const COMMON_METHOD_RESET = 'COMMON_METHOD_RESET';
 export const LISTENER_META = '_simpozioListenerId';
+export const RN_EVENT_EXCEPTION = 'exception';
+export const PING_RN_EVENT_FAIL = 'pingFailed';
+export const PING_RN_EVENT_SERVER_TIMESTAMP = 'serverTimestamp';
