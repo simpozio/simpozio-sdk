@@ -1,6 +1,6 @@
 {
     "name": "simpozio-sdk",
-    "version": "0.0.16",
+    "version": "0.0.18",
     "scripts": {
         "postinstall": "npx gulp babel",
         "dev": "npx gulp; npx gulp watch",
@@ -27,7 +27,7 @@
         "lodash": "^4.17.5",
         "moment": "^2.22.2",
         "raven-js": "^3.26.3",
-        "react-native-simpozio-background-worker": "0.2.8",
+        "react-native-simpozio-background-worker": "0.2.10",
         "redux": "^4.0.0",
         "redux-devtools-extension": "^2.13.5",
         "redux-persist": "^5.10.0",
