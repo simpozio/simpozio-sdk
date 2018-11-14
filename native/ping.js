@@ -44,17 +44,17 @@ export default class Ping {
         const {baseUrl} = _.get(this.store.getState(), 'terminal', {});
 
         return {
-            delay: 5000,
+            delay: 3000,
             count: 10,
             seriesDelay: 60000,
             baseUrl
         };
     }
 
-    start() {
+    start(params: SmpzPingNativeModelType) {
         const {debug} = _.get(this.store.getState(), 'terminal', {});
 
-        SimpozioBackgroundWorker.startPing(this._getNativeMetadata())
+        SimpozioBackgroundWorker.startPing(params || this._getNativeMetadata())
             .then(() => {
                 this._isStarted = false;
                 if (debug) {
