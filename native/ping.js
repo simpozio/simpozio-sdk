@@ -54,7 +54,7 @@ export default class Ping {
     start(params: SmpzPingNativeModelType) {
         const {debug} = _.get(this.store.getState(), 'terminal', {});
 
-        SimpozioBackgroundWorker.startPing(params || this._getNativeMetadata())
+        SimpozioBackgroundWorker.startPing(_.assign({}, params || {}, this._getNativeMetadata()))
             .then(() => {
                 this._isStarted = false;
                 if (debug) {
