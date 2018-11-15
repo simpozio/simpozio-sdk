@@ -7,7 +7,8 @@ import {Store} from 'redux';
 import {
     RN_EVENT_EXCEPTION,
     PING_RN_EVENT_FAIL,
-    PING_RN_EVENT_SERVER_TIMESTAMP
+    PING_RN_EVENT_SERVER_TIMESTAMP,
+    PING_RN_EVENT_DEBUG
 } from '../src/simpozio/common/common.consts';
 import type {SmpzGenericDataType} from '../src/simpozio/common/common.types';
 import {getListenerKey} from '../src/simpozio/common/common.helpers';
@@ -91,6 +92,10 @@ export default class Ping {
 
     onTimestamp(cb: () => mixed): string {
         return this.addListener(PING_RN_EVENT_SERVER_TIMESTAMP, cb);
+    }
+
+    onDebug(cb: () => mixed): string {
+        return this.addListener(PING_RN_EVENT_DEBUG, cb);
     }
 
     onError(cb: () => mixed): string {

@@ -5,4 +5,5 @@ export const COMMON_METHOD_RESET = 'COMMON_METHOD_RESET';
 export const LISTENER_META = '_simpozioListenerId';
 export const RN_EVENT_EXCEPTION = 'exception';
 export const PING_RN_EVENT_FAIL = 'pingFailed';
+export const PING_RN_EVENT_DEBUG = 'debug';
 export const PING_RN_EVENT_SERVER_TIMESTAMP = 'serverTimestamp';

@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.0.21] - _15.11.2018_
+- ping worker debug
+
 ## [0.0.20] - _5.10.2018_
 - ping worker update
 
