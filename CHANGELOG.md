@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.0.22] - _27.11.2018_
+- bg worker update
+
 ## [0.0.21] - _15.11.2018_
 - ping worker debug
 
