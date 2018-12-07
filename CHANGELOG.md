@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.0.23] - _27.11.2018_
+- bg worker update
+
 ## [0.0.22] - _27.11.2018_
 - bg worker update
 
