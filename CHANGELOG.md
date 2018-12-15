@@ -1,5 +1,8 @@
 # Changelog
 
+## [0.0.24] - _15.12.2018_
+- check existence of bg worker methods on heartbeat start
+
 ## [0.0.23] - _27.11.2018_
 - bg worker update
 

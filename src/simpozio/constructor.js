@@ -50,7 +50,6 @@ export default class SimpozioClass {
         ping: PingConstructor
     }: SmpzConstructorType): SimpozioClass {
         const heartbeat = _.get(configObj, 'heartbeat', {});
-        const ping = _.get(configObj, 'ping', false);
         const persist = _.get(configObj, 'persist', false);
 
         if (!SimpozioClassInstance) {
@@ -66,7 +65,7 @@ export default class SimpozioClass {
                 initialData: heartbeat
             });
 
-            if (ping !== false && PingConstructor) {
+            if (PingConstructor) {
                 this.Ping = new PingConstructor({store});
             }
 
@@ -88,12 +87,16 @@ export default class SimpozioClass {
     }
 
     config(configObj: SmpzParamsType) {
-        const {heartbeat} = _.get(configObj, 'data', {});
+        const {heartbeat, ping} = _.get(configObj, 'data', {});
 
         this.store.dispatch(terminalUpdateAction(configObj));
 
         if (SimpozioClassInstance && heartbeat) {
             this.Heartbeat.update(heartbeat);
+        }
+
+        if (ping === false && this.Ping) {
+            this.Ping.stop();
         }
     }
 

@@ -1,6 +1,6 @@
 {
     "name": "simpozio-sdk",
-    "version": "0.0.23",
+    "version": "0.0.24",
     "scripts": {
         "postinstall": "npx gulp babel",
         "dev": "npx gulp; npx gulp watch",

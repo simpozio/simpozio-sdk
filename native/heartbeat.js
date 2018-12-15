@@ -71,7 +71,7 @@ export default class HeartbeatNative extends Heartbeat {
             return;
         }
 
-        if (newData === false || _.get(newData, 'next') === 0) {
+        if (newData === false || _.get(newData, 'next') === 0 && _.isFunction(_.get(SimpozioBackgroundWorker, 'stopHeartbeat'))) {
             SimpozioBackgroundWorker.stopHeartbeat()
                 .then(() => {
                     this._isStarted = false;
@@ -84,7 +84,7 @@ export default class HeartbeatNative extends Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     }
                 });
-        } else if (this._isStarted === false) {
+        } else if (this._isStarted === false && _.isFunction(_.get(SimpozioBackgroundWorker, 'startHeartbeat'))) {
             SimpozioBackgroundWorker.startHeartbeat(this._getNativeMetadata())
                 .then(() => {
                     this._isStarted = true;
@@ -97,7 +97,7 @@ export default class HeartbeatNative extends Heartbeat {
                         console.log('SDK HEARTBEAT ERROR', error);
                     }
                 });
-        } else {
+        } else if(_.isFunction(_.get(SimpozioBackgroundWorker, 'updateHeartbeat'))) {
             SimpozioBackgroundWorker.updateHeartbeat(this._getNativeMetadata());
         }
 
@@ -109,7 +109,9 @@ export default class HeartbeatNative extends Heartbeat {
             return;
         }
 
-        SimpozioBackgroundWorker.removeListener(key);
+        if(_.isFunction(_.get(SimpozioBackgroundWorker, 'removeListener'))) {
+            SimpozioBackgroundWorker.removeListener(key);
+        }
 
         listeners[key] = null;
     }

@@ -55,35 +55,38 @@ export default class Ping {
     start(params: SmpzPingNativeModelType) {
         const {debug} = _.get(this.store.getState(), 'terminal', {});
 
-        SimpozioBackgroundWorker.startPing(_.assign({}, params || {}, this._getNativeMetadata()))
-            .then(() => {
-                this._isStarted = false;
-                if (debug) {
-                    console.log('SDK PING STARTED');
-                }
-            })
-            .catch((error: SmpzGenericDataType) => {
-                if (debug) {
-                    console.log('SDK PING ERROR', error);
-                }
-            });
+        if (_.isFunction(_.get(SimpozioBackgroundWorker, 'startPing'))) {
+            SimpozioBackgroundWorker.startPing(_.assign({}, params || {}, this._getNativeMetadata()))
+                .then(() => {
+                    this._isStarted = false;
+                    if (debug) {
+                        console.log('SDK PING STARTED');
+                    }
+                })
+                .catch((error: SmpzGenericDataType) => {
+                    if (debug) {
+                        console.log('SDK PING ERROR', error);
+                    }
+                });
+        }
     }
 
     stop() {
         const {debug} = _.get(this.store.getState(), 'terminal', {});
-
-        SimpozioBackgroundWorker.stopPing()
-            .then(() => {
-                this._isStarted = true;
-                if (debug) {
-                    console.log('SDK PING STOPPED ');
-                }
-            })
-            .catch((error: SmpzGenericDataType) => {
-                if (debug) {
-                    console.log('SDK PING ERROR', error);
-                }
-            });
+        if (_.isFunction(_.get(SimpozioBackgroundWorker, 'stopPing'))) {
+            SimpozioBackgroundWorker.stopPing()
+                .then(() => {
+                    this._isStarted = true;
+                    if (debug) {
+                        console.log('SDK PING STOPPED ');
+                    }
+                })
+                .catch((error: SmpzGenericDataType) => {
+                    if (debug) {
+                        console.log('SDK PING ERROR', error);
+                    }
+                });
+        }
     }
 
     onFail(cb: () => mixed): string {
@@ -106,8 +109,9 @@ export default class Ping {
         if (!listeners[key]) {
             return;
         }
-
-        SimpozioBackgroundWorker.removeListener(key);
+        if (_.isFunction(_.get(SimpozioBackgroundWorker, 'removeListener'))) {
+            SimpozioBackgroundWorker.removeListener(key);
+        }
 
         listeners[key] = null;
     }
